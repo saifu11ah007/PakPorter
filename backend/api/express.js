@@ -7,9 +7,9 @@ import serverless from 'serverless-http';
 
 dotenv.config();
 const app = express();
-
+//https://pakporter-fyp.netlify.app
 app.use(express.json());
-app.use(cors({ origin: 'https://pakporter-fyp.netlify.app' }));
+app.use(cors({ origin: '*' }));
 app.get('/', (req, res) => res.send('PakPorter'));
 
 app.use('/auth', AuthRouter);
