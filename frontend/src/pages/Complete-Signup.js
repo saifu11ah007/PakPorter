@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Upload, ArrowLeft, CheckCircle, User, Mail, Phone, MapPin, Globe, Camera } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { Upload, CheckCircle, User, Mail, Phone, MapPin, Globe, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 const PakPorterSignupFinal = () => {
   const [formData, setFormData] = useState({
