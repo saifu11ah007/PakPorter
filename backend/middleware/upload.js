@@ -5,11 +5,6 @@ import multer from 'multer';
          storage: multer.memoryStorage(),
        });
 
-       export const uploadMiddleware = upload.fields([
-         { name: 'cnicFront', maxCount: 1 },
-         { name: 'cnicBack', maxCount: 1 },
-       ]);
-
        export const saveToBlob = async (req, res, next) => {
          try {
            if (req.files.cnicFront) {
@@ -35,4 +30,7 @@ import multer from 'multer';
          }
        };
 
-       export default uploadMiddleware;
+       export default upload.fields([
+         { name: 'cnicFront', maxCount: 1 },
+         { name: 'cnicBack', maxCount: 1 },
+       ]);
