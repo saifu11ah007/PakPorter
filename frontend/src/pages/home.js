@@ -1,11 +1,13 @@
 import React from 'react';
 import { Truck, Package, Clock, MapPin, Star, Users, Shield, Zap } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 const PakPorterHomepage = () => {
+  const navigate = useNavigate();
   const handleSignUp = () => {
     // In a real app, this would navigate to /signup
     // For now, we'll just show an alert
     alert('Redirecting to signup page...');
+    navigate("/signup");
     // window.location.href = '/signup';
   };
 
@@ -24,10 +26,10 @@ const PakPorterHomepage = () => {
               </span>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
+              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
+              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</a>
+              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
+              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
             </nav>
             <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
               Login
@@ -202,28 +204,28 @@ const PakPorterHomepage = () => {
             <div>
               <h3 className="font-semibold mb-4">Services</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Same Day Delivery</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">International Shipping</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Bulk Orders</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Business Solutions</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Same Day Delivery</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">International Shipping</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Bulk Orders</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Business Solutions</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Press</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Press</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Track Package</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Track Package</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="/" className="hover:text-white transition-colors">Privacy Policy</a></li>
               </ul>
             </div>
           </div>
