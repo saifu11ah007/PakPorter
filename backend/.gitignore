@@ -3,7 +3,7 @@ node_modules/
 
 # Env files
 .env
-
+uploads/
 # Logs
 logs
 *.log
@@ -12,3 +12,4 @@ npm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+.vercel
