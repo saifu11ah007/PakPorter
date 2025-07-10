@@ -90,15 +90,24 @@ const resendOTP = async (req, res) => {
     res.status(500).json({ message: 'Resend OTP failed', error: error.message });
   }
 };
-
- const completeSignup = async (req, res) => {
+const completeSignup = async (req, res) => {
          try {
            const { email, phone, country, city } = req.body;
            const cnicFront = req.files?.cnicFront?.[0]?.key;
            const cnicBack = req.files?.cnicBack?.[0]?.key;
 
-           const user = await User.findOneAndUpdate(
-             { email },
+           console.log('Complete signup request:', { email, phone, country, city, cnicFront, cnicBack });
+
+           // Check if user exists
+           const user = await User.findOne({ email: email.toLowerCase() });
+           if (!user) {
+             console.log('User not found for email:', email);
+             return res.status(404).json({ success: false, message: 'User not found' });
+           }
+
+           // Update user with new fields
+           const updatedUser = await User.findOneAndUpdate(
+             { email: email.toLowerCase() },
              {
                phone,
                country,
@@ -110,10 +119,12 @@ const resendOTP = async (req, res) => {
              { new: true }
            );
 
-           if (!user) {
-             return res.status(404).json({ success: false, message: 'User not found' });
+           if (!updatedUser) {
+             console.log('Update failed for email:', email);
+             return res.status(404).json({ success: false, message: 'User update failed' });
            }
 
+           console.log('User updated:', updatedUser);
            res.status(200).json({ success: true, message: 'User created' });
          } catch (error) {
            console.error('Complete signup error:', error);
