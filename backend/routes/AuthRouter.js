@@ -1,13 +1,12 @@
 import express from 'express';
 import { signup, verifyOTP, resendOTP, completeSignup, login } from '../controllers/AuthController.js';
-import upload, { uploadToBlob } from '../middleware/upload.js';
-
+import upload, { saveToBlob } from '../middleware/upload.js';
 const router = express.Router();
 
 router.post('/send-otp', signup);
 router.post('/verify-otp', verifyOTP);
 router.post('/resend-otp', resendOTP);
-router.post('/complete-info', upload.fields([{ name: 'cnicFront' }, { name: 'cnicBack' }]), uploadToBlob, completeSignup);
+router.post('/complete-info', upload.fields([{ name: 'cnicFront' }, { name: 'cnicBack' }]), saveToBlob, completeSignup);
 router.post('/login', login);
 
 export default router;
