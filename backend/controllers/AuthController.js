@@ -91,41 +91,34 @@ const resendOTP = async (req, res) => {
   }
 };
 
-const completeSignup = async (req, res) => {
-  try {
-    const { email, phone, country, city } = req.body;
-    const cnicFront = req.files?.cnicFront?.[0]?.path;
-    const cnicBack = req.files?.cnicBack?.[0]?.path;
+ const completeSignup = async (req, res) => {
+         try {
+           const { email, phone, country, city } = req.body;
+           const cnicFront = req.files?.cnicFront?.[0]?.key;
+           const cnicBack = req.files?.cnicBack?.[0]?.key;
 
-    const pendingUser = otpMemory[email];
-    if (!pendingUser || !pendingUser.verified) {
-      return res.status(400).json({ message: 'OTP not verified or missing data' });
-    }
+           const user = await User.findOneAndUpdate(
+             { email },
+             {
+               phone,
+               country,
+               city,
+               cnicFront,
+               cnicBack,
+               isVerified: true
+             },
+             { new: true }
+           );
 
-    const existing = await User.findOne({ email });
-    if (existing) return res.status(409).json({ message: 'User already exists' });
+           if (!user) {
+             return res.status(404).json({ success: false, message: 'User not found' });
+           }
 
-    const hashedPassword = await bcrypt.hash(pendingUser.password, 10);
-    const user = new User({
-      fullName: pendingUser.fullName,
-      email: pendingUser.email,
-      password: hashedPassword,
-      cnicNumber: pendingUser.cnicNumber,
-      phone,
-      country,
-      city,
-      isVerified: true,
-      cnicFront, // Updated to match schema
-      cnicBack   // Updated to match schema
-    });
-
-    await user.save();
-    delete otpMemory[email];
-    res.status(200).json({ success: true, message: 'User created' });
-  } catch (error) {
-    console.error('Complete signup error:', error.stack);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
+           res.status(200).json({ success: true, message: 'User created' });
+         } catch (error) {
+           console.error('Complete signup error:', error);
+           res.status(500).json({ success: false, message: 'Server error', error: error.message });
+         }
+       };
 
 export { signup, login, sendOTP, verifyOTP, resendOTP, completeSignup };
