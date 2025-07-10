@@ -182,13 +182,13 @@ const PakPorterOTPScreen = () => {
             {/* Terms */}
             <p className="text-xs text-gray-500 text-center mt-6">
               By continuing, you agree to our{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700">
+              {/* <a href="#" className="text-blue-600 hover:text-blue-700">
                 Terms of Service
               </a>{' '}
               and{' '}
               <a href="#" className="text-blue-600 hover:text-blue-700">
                 Privacy Policy
-              </a>.
+              </a>. */}
             </p>
           </div>
         </div>

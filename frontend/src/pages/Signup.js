@@ -13,7 +13,7 @@ const AccountDetailsPage = () => {
     cnic: '',
   });
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("signupData"));
+    // const savedData = JSON.parse(localStorage.getItem("signupData"));
     
   }, []);
 
