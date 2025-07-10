@@ -1,31 +1,34 @@
 import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import connectDB from '../config/db.js';
-import AuthRouter from '../routes/AuthRouter.js';
-import serverless from 'serverless-http';
+       import cors from 'cors';
+       import dotenv from 'dotenv';
+       import connectDB from '../config/db.js';
+       import AuthRouter from '../routes/AuthRouter.js';
+       import serverless from 'serverless-http';
 
-dotenv.config();
-const app = express();
-//
-app.use(express.json());
-app.use(cors({ origin: 'https://pakporter-fyp.netlify.app' }));
-app.get('/', (req, res) => res.send('PakPorter'));
+       dotenv.config();
+       const app = express();
 
-app.use('/auth', AuthRouter);
+       app.use(express.json());
+       app.use(cors({ 
+         origin: 'https://pakporter-fyp.netlify.app',
+         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+         allowedHeaders: ['Content-Type', 'Authorization']
+       }));
+       app.get('/', (req, res) => res.send('PakPorter'));
 
-async function startServer() {
-  try {
-    await connectDB();
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('Failed to connect to MongoDB:', error);
-    process.exit(1);
-  }
-}
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-startServer();
+       app.use('/auth', AuthRouter);
 
-export default app;
-export const handler = serverless(app); // Use ES module export
+       async function startServer() {
+         try {
+           await connectDB();
+           console.log('Connected to MongoDB');
+         } catch (error) {
+           console.error('Failed to connect to MongoDB:', error);
+           process.exit(1);
+         }
+       }
+
+       startServer();
+
+       export default app;
+       export const handler = serverless(app);
