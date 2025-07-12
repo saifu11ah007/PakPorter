@@ -12,7 +12,8 @@ import express from 'express';
        app.use(cors({ 
          origin: 'https://pakporter-fyp.netlify.app',
          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-         allowedHeaders: ['Content-Type', 'Authorization']
+         allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
+          credentials: true
        }));
        app.get('/', (req, res) => res.send('PakPorter'));
 
