@@ -94,8 +94,10 @@ const resendOTP = async (req, res) => {
 const completeSignup = async (req, res) => {
   try {
     const { email, phone, country, city } = req.body;
-    const cnicFront = req.files?.cnicFront?.[0]?.path;
-    const cnicBack = req.files?.cnicBack?.[0]?.path;
+    const cnicFront = req.files?.cnicFront?.[0]?.key; // Use .key for Vercel Blob URL
+    const cnicBack = req.files?.cnicBack?.[0]?.key;   // Use .key for Vercel Blob URL
+
+    console.log('Complete signup request:', { email, phone, country, city, cnicFront, cnicBack });
 
     const pendingUser = otpMemory[email];
     if (!pendingUser || !pendingUser.verified) {
@@ -115,8 +117,8 @@ const completeSignup = async (req, res) => {
       country,
       city,
       isVerified: true,
-      cnicFront, // Updated to match schema
-      cnicBack   // Updated to match schema
+      cnicFront, // Save the Blob URL
+      cnicBack   // Save the Blob URL
     });
 
     await user.save();
