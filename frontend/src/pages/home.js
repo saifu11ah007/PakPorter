@@ -1,14 +1,25 @@
 import React from 'react';
-import { Truck, Package, Clock, MapPin, Star, Users, Shield, Zap } from 'lucide-react';
+import { Truck, Package, Clock, MapPin, Star, Users, Shield, Zap, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
 const PakPorterHomepage = () => {
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('authToken'); // Check if user is logged in
+
   const handleSignUp = () => {
-    // In a real app, this would navigate to /signup
-    // For now, we'll just show an alert
-    alert('Redirecting to signup page...');
-    navigate("/signup");
-    // window.location.href = '/signup';
+    if (isLoggedIn) {
+      alert('You are already logged in!');
+      navigate('/');
+    } else {
+      navigate('/signup');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('tokenTimestamp');
+    alert('Logged out successfully!');
+    navigate('/login');
   };
 
   return (
@@ -31,9 +42,22 @@ const PakPorterHomepage = () => {
               <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
               <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
             </nav>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-              Login
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center"
+              >
+                <LogOut className="w-5 h-5 mr-2" />
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </header>
