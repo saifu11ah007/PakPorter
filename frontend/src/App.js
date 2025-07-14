@@ -5,7 +5,9 @@ import OTP from './pages/OTP';
 import CompleteSignup from './pages/Complete-Signup';
 import PakPorterHomepage from './pages/home.js';
 import PakPorterLogin from './pages/Login.js';
-
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import RequireAdminAuth from './utils/RequireAdminAuth';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -16,6 +18,15 @@ function App() {
   return (
     <Router>
       <Routes>
+         <Route path="/admin/login" element={<AdminLogin />} />
+         <Route 
+          path="/admin/dashboard" 
+          element={
+            <RequireAdminAuth>
+              <AdminDashboard />
+            </RequireAdminAuth>
+          } 
+        />
         <Route path="/" element={<PakPorterHomepage />} />
         <Route
           path="/login"
@@ -40,4 +51,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

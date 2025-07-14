@@ -130,4 +130,5 @@ const completeSignup = async (req, res) => {
   }
 };
 
+
 export { signup, login, sendOTP, verifyOTP, resendOTP, completeSignup };
