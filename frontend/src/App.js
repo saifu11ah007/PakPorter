@@ -5,9 +5,9 @@ import OTP from './pages/OTP';
 import CompleteSignup from './pages/Complete-Signup';
 import PakPorterHomepage from './pages/home.js';
 import PakPorterLogin from './pages/Login.js';
-import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
-import RequireAdminAuth from './utils/RequireAdminAuth';
+import AdminLogin from './pages/AdminLogin.js';
+import AdminDashboard from './pages/AdminDashboard.js';
+import RequireAdminAuth from './utils/RequireAdminAuth.js';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
