@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 
@@ -12,10 +12,42 @@ const AdminDashboard = () => {
   const [updatingUser, setUpdatingUser] = useState(null);
   const navigate = useNavigate();
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+  // Memoize fetchUsers to stabilize it for useEffect
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('adminLoggedIn');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
+
+      const response = await fetch(`${API_URL}/auth/users`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      setUsers(data);
+      setError('');
+    } catch (err) {
+      setError('Error fetching users: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_URL]); // Added API_URL to dependency array
+
   // Fetch all users on component mount
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   // Filter users based on search term and verification status
   useEffect(() => {
@@ -44,33 +76,19 @@ const AdminDashboard = () => {
     setFilteredUsers(filtered);
   }, [users, searchTerm, verificationFilter]);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:5000/auth/users');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
-      const data = await response.json();
-      setUsers(data);
-      setError('');
-    } catch (err) {
-      setError('Error fetching users: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleVerificationToggle = async (userId, currentStatus) => {
     try {
       setUpdatingUser(userId);
+      const token = localStorage.getItem('adminLoggedIn');
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.');
+      }
       
-      const response = await fetch(`http://localhost:5000/auth/verify-user/${userId}`, {
+      const response = await fetch(`${API_URL}/auth/verify-user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           isVerified: !currentStatus
@@ -78,15 +96,15 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update verification status');
+        throw new Error(`Failed to update verification status: ${response.statusText}`);
       }
 
       const updatedUser = await response.json();
       
-      // Update the user in the state
+      // Update the user in the state with backend response
       setUsers(prevUsers => 
         prevUsers.map(user => 
-          user._id === userId ? { ...user, isVerified: !currentStatus } : user
+          user._id === userId ? updatedUser.user : user
         )
       );
       
@@ -207,17 +225,17 @@ const AdminDashboard = () => {
                   </td>
                   <td>
                     <div className="cnic-images">
-                      {user.cnicFrontImage && (
+                      {user.cnicFront && (
                         <img
-                          src={`http://localhost:5000/${user.cnicFrontImage}`}
+                          src={user.cnicFront}
                           alt="CNIC Front"
                           className="cnic-image"
                           title="CNIC Front"
                         />
                       )}
-                      {user.cnicBackImage && (
+                      {user.cnicBack && (
                         <img
-                          src={`http://localhost:5000/${user.cnicBackImage}`}
+                          src={user.cnicBack}
                           alt="CNIC Back"
                           className="cnic-image"
                           title="CNIC Back"
