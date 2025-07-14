@@ -1,9 +1,11 @@
-const User = require('../models/User');
+// AdminController.js
+import User from '../models/User.js'; // Use import instead of require
+
 const getAllUsers = async (req, res) => {
   try {
     // Fetch all users and exclude sensitive information like passwords
     const users = await User.find({}, '-password -__v').sort({ createdAt: -1 });
-    
+
     res.status(200).json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -13,6 +15,7 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
+
 const verifyUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -44,14 +47,14 @@ const verifyUser = async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating user verification:', error);
-    
+
     // Handle invalid ObjectId
     if (error.name === 'CastError') {
       return res.status(400).json({ 
         message: 'Invalid user ID format' 
       });
     }
-    
+
     res.status(500).json({ 
       message: 'Error updating user verification status', 
       error: error.message 
@@ -59,9 +62,4 @@ const verifyUser = async (req, res) => {
   }
 };
 
-// Export the functions
-module.exports = {
-  // ... your existing exports
-  getAllUsers,
-  verifyUser
-};
+export { getAllUsers, verifyUser }; // Use ES Module export
