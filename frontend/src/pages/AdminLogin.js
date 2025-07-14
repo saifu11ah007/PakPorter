@@ -4,14 +4,12 @@ import './AdminLogin.css';
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({
-    email: '',
+    username: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   // Check if admin is already logged in
   useEffect(() => {
@@ -27,7 +25,6 @@ const AdminLogin = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (error) setError('');
   };
 
@@ -37,22 +34,19 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials)
-      });
+      const adminUser = process.env.REACT_APP_ADMIN_USER;
+      const adminPass = process.env.REACT_APP_ADMIN_PASS;
 
-      if (!response.ok) {
-        throw new Error('Invalid email or password');
+      if (!adminUser || !adminPass) {
+        throw new Error('Admin credentials not configured');
       }
 
-      const data = await response.json();
-      // Store JWT token
-      localStorage.setItem('adminLoggedIn', data.token);
-      navigate('/admin/dashboard');
+      if (credentials.username === adminUser && credentials.password === adminPass) {
+        localStorage.setItem('adminLoggedIn', 'true');
+        navigate('/admin/dashboard');
+      } else {
+        throw new Error('Invalid username or password');
+      }
     } catch (err) {
       setError(err.message || 'An error occurred during login. Please try again.');
     } finally {
@@ -70,15 +64,15 @@ const AdminLogin = () => {
         
         <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Username</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={credentials.email}
+              type="text"
+              id="username"
+              name="username"
+              value={credentials.username}
               onChange={handleInputChange}
               required
-              placeholder="Enter admin email"
+              placeholder="Enter admin username"
               disabled={loading}
             />
           </div>

@@ -12,21 +12,21 @@ const AdminDashboard = () => {
   const [updatingUser, setUpdatingUser] = useState(null);
   const navigate = useNavigate();
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const API_URL = process.env.REACT_APP_API_URL;
+  const ADMIN_TOKEN = process.env.REACT_APP_ADMIN_TOKEN || '';
 
   // Memoize fetchUsers to stabilize it for useEffect
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('adminLoggedIn');
-      if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+      if (!ADMIN_TOKEN) {
+        throw new Error('No authentication token configured. Please check environment variables.');
       }
 
-      const response = await fetch(`${API_URL}/auth/users`, {
+      const response = await fetch(`${API_URL}/api/auth/users`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${ADMIN_TOKEN}`
         }
       });
       
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [API_URL]); // Added API_URL to dependency array
+  }, [API_URL, ADMIN_TOKEN]);
 
   // Fetch all users on component mount
   useEffect(() => {
@@ -79,16 +79,15 @@ const AdminDashboard = () => {
   const handleVerificationToggle = async (userId, currentStatus) => {
     try {
       setUpdatingUser(userId);
-      const token = localStorage.getItem('adminLoggedIn');
-      if (!token) {
-        throw new Error('No authentication token found. Please log in.');
+      if (!ADMIN_TOKEN) {
+        throw new Error('No authentication token configured. Please check environment variables.');
       }
       
-      const response = await fetch(`${API_URL}/auth/verify-user/${userId}`, {
+      const response = await fetch(`${API_URL}/api/auth/verify-user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${ADMIN_TOKEN}`
         },
         body: JSON.stringify({
           isVerified: !currentStatus
