@@ -4,17 +4,19 @@ import './AdminLogin.css';
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
   // Check if admin is already logged in
   useEffect(() => {
-    const adminLoggedIn = localStorage.getItem('adminLoggedIn');
-    if (adminLoggedIn === 'true') {
+    const token = localStorage.getItem('adminLoggedIn');
+    if (token) {
       navigate('/admin/dashboard');
     }
   }, [navigate]);
@@ -35,22 +37,24 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      // Get admin credentials from environment variables
-      const adminUser = process.env.REACT_APP_ADMIN_USER;
-      const adminPass = process.env.REACT_APP_ADMIN_PASS;
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+      });
 
-      // Validate credentials
-      if (credentials.username === adminUser && credentials.password === adminPass) {
-        // Set admin logged in status
-        localStorage.setItem('adminLoggedIn', 'true');
-        
-        // Redirect to admin dashboard
-        navigate('/admin/dashboard');
-      } else {
-        setError('Invalid username or password. Please try again.');
+      if (!response.ok) {
+        throw new Error('Invalid email or password');
       }
+
+      const data = await response.json();
+      // Store JWT token
+      localStorage.setItem('adminLoggedIn', data.token);
+      navigate('/admin/dashboard');
     } catch (err) {
-      setError('An error occurred during login. Please try again.');
+      setError(err.message || 'An error occurred during login. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -66,15 +70,15 @@ const AdminLogin = () => {
         
         <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={credentials.username}
+              type="email"
+              id="email"
+              name="email"
+              value={credentials.email}
               onChange={handleInputChange}
               required
-              placeholder="Enter admin username"
+              placeholder="Enter admin email"
               disabled={loading}
             />
           </div>
