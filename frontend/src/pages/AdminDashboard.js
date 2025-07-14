@@ -83,7 +83,7 @@ const AdminDashboard = () => {
         throw new Error('No authentication token configured. Please check environment variables.');
       }
       
-      const response = await fetch(`${API_URL}/api/auth/verify-user/${userId}`, {
+      const response = await fetch(`${API_URL}/auth/verify-user/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
