@@ -1,6 +1,7 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Upload, CheckCircle, User, Mail, Phone, MapPin, Globe, Camera } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
 const PakPorterSignupFinal = () => {
   const [formData, setFormData] = useState({
     phone: '',
@@ -14,31 +15,32 @@ const PakPorterSignupFinal = () => {
     cnicFront: null,
     cnicBack: null
   });
-  
   const [userInfo, setUserInfo] = useState({
     name: '',
     email: ''
   });
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Mock previous step data (in real app, this would come from localStorage or context)
   useEffect(() => {
-    // Simulate fetching user data from previous steps
-    const mockUserData = {
-  name: localStorage.getItem("pendingName") || "Unknown",
-  email: localStorage.getItem("pendingEmail") || "Unknown"
-};
+    const step = localStorage.getItem("step");
+    const pendingEmail = localStorage.getItem("pendingEmail");
+    const pendingName = localStorage.getItem("pendingName");
+    const pendingPassword = localStorage.getItem("pendingPassword");
+    const pendingCnic = localStorage.getItem("pendingCnic");
 
-    
-    // In real implementation, check if previous steps completed
-    // If not, redirect to /signup
-    setUserInfo(mockUserData);
-  }, []);
+    if (step !== "complete" || !pendingEmail || !pendingName || !pendingPassword || !pendingCnic) {
+      navigate("/signup");
+    } else {
+      setUserInfo({
+        name: pendingName,
+        email: pendingEmail
+      });
+    }
+  }, [navigate]);
 
   const countries = [
-    'Pakistan', 'United States', 'United Kingdom', 'Canada', 'Australia', 
+    'Pakistan', 'United States', 'United Kingdom', 'Canada', 'Australia',
     'Germany', 'France', 'UAE', 'Saudi Arabia', 'Turkey'
   ];
 
@@ -48,8 +50,6 @@ const PakPorterSignupFinal = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -65,11 +65,11 @@ const PakPorterSignupFinal = () => {
       if (!file.type.startsWith('image/')) {
         setErrors(prev => ({
           ...prev,
-          [type]: 'Please upload a valid image file'
+          [type]: 'Please upload a valid image file (JPEG, PNG)'
         }));
         return;
       }
-      
+
       // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setErrors(prev => ({
@@ -93,106 +93,99 @@ const PakPorterSignupFinal = () => {
         }));
       };
       reader.readAsDataURL(file);
-      
-      // Clear error
+
       setErrors(prev => ({
         ...prev,
         [type]: ''
       }));
     }
-    
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^\+?[\d\s-()]{10,}$/.test(formData.phone)) {
       newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     if (!formData.country) {
       newErrors.country = 'Country is required';
     }
-    
+
     if (!formData.city.trim()) {
       newErrors.city = 'City is required';
     }
-    
+
     if (!formData.cnicFront) {
       newErrors.cnicFront = 'CNIC front image is required';
     }
-    
+
     if (!formData.cnicBack) {
       newErrors.cnicBack = 'CNIC back image is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) return;
-  
-  setIsSubmitting(true);
-  
-  try {
-    const submitData = new FormData();
-    submitData.append('phone', formData.phone);
-    submitData.append('country', formData.country);
-    submitData.append('city', formData.city);
-    submitData.append('cnicFront', formData.cnicFront);
-    submitData.append('cnicBack', formData.cnicBack);
-    submitData.append('email', userInfo.email);
-    submitData.append('fullName', userInfo.name);
-    submitData.append('password', localStorage.getItem('pendingPassword'));
-    submitData.append('cnicNumber', localStorage.getItem('pendingCnic'));
+    e.preventDefault();
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/complete-info`, {
-      method: 'POST',
-      body: submitData
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Server error');
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
     }
 
-    // Clear localStorage after successful signup
-    localStorage.removeItem("signupData");
-    localStorage.removeItem("pendingName");
-    localStorage.removeItem("pendingEmail");
-    localStorage.removeItem("pendingPassword");
-    localStorage.removeItem("pendingCnic");
-    localStorage.removeItem("step");
+    setIsSubmitting(true);
 
-    alert('Signup completed successfully! Welcome to PakPorter!');
-    navigate("/login"); // Redirect to login page after completion
-  } catch (error) {
-    console.error('Submission error:', error);
-    alert('An error occurred. Please try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
- useEffect(() => {
-  const step = localStorage.getItem("step");
-  const pendingEmail = localStorage.getItem("pendingEmail");
-  const pendingName = localStorage.getItem("pendingName");
-  if (step !== "otp" || !pendingEmail || !pendingName) {
-    navigate("/signup");
-  } else {
-    setUserInfo({
-      name: pendingName,
-      email: pendingEmail
-    });
-  }
-}, [navigate]);
- 
+    try {
+      const submitData = new FormData();
+      submitData.append('phone', formData.phone);
+      submitData.append('country', formData.country);
+      submitData.append('city', formData.city);
+      submitData.append('cnicFront', formData.cnicFront);
+      submitData.append('cnicBack', formData.cnicBack);
+      submitData.append('email', userInfo.email);
+      submitData.append('fullName', userInfo.name);
+      submitData.append('password', localStorage.getItem('pendingPassword'));
+      submitData.append('cnicNumber', localStorage.getItem('pendingCnic'));
+
+      // Log FormData for debugging
+      for (let [key, value] of submitData.entries()) {
+        console.log(`${key}: ${value instanceof File ? value.name : value}`);
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/complete-info`, {
+        method: 'POST',
+        body: submitData
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to complete signup');
+      }
+
+      // Clear localStorage after successful signup
+      localStorage.removeItem("signupData");
+      localStorage.removeItem("pendingName");
+      localStorage.removeItem("pendingEmail");
+      localStorage.removeItem("pendingPassword");
+      localStorage.removeItem("pendingCnic");
+      localStorage.removeItem("step");
+
+      alert('✅ Signup completed successfully! Welcome to PakPorter!');
+      navigate("/login");
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert(`❌ Error: ${error.message || 'An error occurred. Please try again.'}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -347,7 +340,7 @@ const PakPorterSignupFinal = () => {
                   }`}>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png"
                       onChange={(e) => handleFileUpload(e, 'cnicFront')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
@@ -363,7 +356,7 @@ const PakPorterSignupFinal = () => {
                     ) : (
                       <div className="text-center">
                         <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">Click to upload</p>
+                        <p className="text-sm text-gray-600">Click to upload (JPEG/PNG)</p>
                       </div>
                     )}
                   </div>
@@ -387,7 +380,7 @@ const PakPorterSignupFinal = () => {
                   }`}>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png"
                       onChange={(e) => handleFileUpload(e, 'cnicBack')}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
@@ -403,7 +396,7 @@ const PakPorterSignupFinal = () => {
                     ) : (
                       <div className="text-center">
                         <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">Click to upload</p>
+                        <p className="text-sm text-gray-600">Click to upload (JPEG/PNG)</p>
                       </div>
                     )}
                   </div>
@@ -419,7 +412,6 @@ const PakPorterSignupFinal = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              
               <button
                 type="submit"
                 disabled={isSubmitting}
