@@ -23,7 +23,7 @@ const AdminDashboard = () => {
         throw new Error('No authentication token configured. Please check environment variables.');
       }
 
-      const response = await fetch(`${API_URL}/api/auth/users`, {
+      const response = await fetch(`${API_URL}/auth/users`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${ADMIN_TOKEN}`
