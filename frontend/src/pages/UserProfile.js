@@ -215,15 +215,19 @@ const UserProfile = () => {
                   <div>
                     <h4 className="text-lg font-medium text-gray-700 mb-3">CNIC Front Image</h4>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
-                      
-                      
-                      {profile.cnicFront && (
+                      {profile?.cnicFrontImage ? (
                         <img
-                          src={profile.cnicFront}
+                          src={profile.cnicFrontImage}
                           alt="CNIC Front"
                           className="w-full h-48 object-cover rounded-lg shadow-md"
-                          title="CNIC Front"
                         />
+                      ) : (
+                        <div className="w-full h-48 flex items-center justify-center text-gray-500">
+                          <div className="text-center">
+                            <CreditCard className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                            <p>No front image uploaded</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -232,13 +236,19 @@ const UserProfile = () => {
                   <div>
                     <h4 className="text-lg font-medium text-gray-700 mb-3">CNIC Back Image</h4>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
-                      {profile.cnicBack && (
+                      {profile?.cnicBackImage ? (
                         <img
-                          src={profile.cnicBack}
+                          src={profile.cnicBackImage}
                           alt="CNIC Back"
-                          className="cnic-image"
-                          title="CNIC Back"
+                          className="w-full h-48 object-cover rounded-lg shadow-md"
                         />
+                      ) : (
+                        <div className="w-full h-48 flex items-center justify-center text-gray-500">
+                          <div className="text-center">
+                            <CreditCard className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                            <p>No back image uploaded</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
