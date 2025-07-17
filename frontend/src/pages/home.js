@@ -1,10 +1,11 @@
 import React from 'react';
-import { Truck, Package, Clock, MapPin, Star, Users, Shield, Zap, LogOut } from 'lucide-react';
+import { Truck, Package, Clock, MapPin, Star, Users, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar.jsx'; // Adjust path as needed
 
 const PakPorterHomepage = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('authToken'); // Check if user is logged in
+  const isLoggedIn = !!localStorage.getItem('token'); // Use 'token' for consistency
 
   const handleSignUp = () => {
     if (isLoggedIn) {
@@ -15,52 +16,10 @@ const PakPorterHomepage = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('tokenTimestamp');
-    alert('Logged out successfully!');
-    navigate('/login');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
-      <header className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Truck className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                PakPorter
-              </span>
-            </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</a>
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
-            </nav>
-            {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center"
-              >
-                <LogOut className="w-5 h-5 mr-2" />
-                Logout
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate('/login')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Login
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
