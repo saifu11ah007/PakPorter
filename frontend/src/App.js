@@ -8,6 +8,7 @@ import PakPorterLogin from './pages/Login.js';
 import AdminLogin from './pages/AdminLogin.js';
 import AdminDashboard from './pages/AdminDashboard.js';
 import RequireAdminAuth from './utils/RequireAdminAuth.js';
+import UserProfile from './pages/UserProfile.js';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -19,6 +20,7 @@ function App() {
     <Router>
       <Routes>
          <Route path="/admin/login" element={<AdminLogin />} />
+         <Route path="/user/profile" element={<UserProfile />} />
          <Route 
           path="/admin/dashboard" 
           element={
