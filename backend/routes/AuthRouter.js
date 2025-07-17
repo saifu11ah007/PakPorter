@@ -1,7 +1,7 @@
 import express from 'express';
 import { signup, verifyOTP, resendOTP, completeSignup, login } from '../controllers/AuthController.js';
 import { verifyUser, getAllUsers, getProfile } from '../controllers/AdminController.js';
-
+import authMiddleware from '../middleware/AuthValidation.js';
 import upload, { saveToBlob } from '../middleware/upload.js';
 const router = express.Router();
 
@@ -12,6 +12,6 @@ router.post('/complete-info', upload, saveToBlob, completeSignup);
 router.post('/login', login);
 router.get('/users', getAllUsers);
 router.put('/verify-user/:id', verifyUser);
-router.get('/profile', getProfile);
+router.get('/profile',authMiddleware, getProfile);
 
 export default router;

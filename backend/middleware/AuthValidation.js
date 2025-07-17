@@ -1,5 +1,19 @@
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
 
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Should include _id
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
 const signupValidation = (req, res, next) => {
   const schema = Joi.object({
     fullName: Joi.string().min(3).max(100).required(),
@@ -26,4 +40,4 @@ const loginValidation = (req, res, next) => {
   next();
 };
 
-export { loginValidation, signupValidation };
+export { loginValidation, signupValidation, authMiddleware };
