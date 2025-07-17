@@ -31,35 +31,36 @@ const UserProfile = () => {
   }, []);
 
   const fetchProfile = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/profile`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token expired, redirect to login
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-          return;
-        }
-        throw new Error('Failed to fetch profile');
+  try {
+    const token = localStorage.getItem('token');
+    console.log('Token:', token); // Debug
+    console.log('API URL:', `${process.env.REACT_APP_API_URL}/auth/profile`); // Debug
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/profile`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log('Response status:', response.status); // Debug
+    console.log('Response body:', await response.text()); // Debug
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
       }
-
-      const data = await response.json();
-      setProfile(data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setError('Unable to fetch user profile');
-    } finally {
-      setLoading(false);
+      throw new Error('Failed to fetch profile');
     }
-  };
+    const data = await response.json();
+    setProfile(data);
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    setError('Unable to fetch user profile');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem('token');

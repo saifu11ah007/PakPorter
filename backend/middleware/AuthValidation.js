@@ -13,7 +13,21 @@ const signupValidation = (req, res, next) => {
   }
   next();
 };
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Should include _id
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
 
+export default authMiddleware;
 const loginValidation = (req, res, next) => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
@@ -26,4 +40,4 @@ const loginValidation = (req, res, next) => {
   next();
 };
 
-export { loginValidation, signupValidation };
+export { loginValidation, signupValidation,authMiddleware };
