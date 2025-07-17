@@ -215,9 +215,9 @@ const UserProfile = () => {
                   <div>
                     <h4 className="text-lg font-medium text-gray-700 mb-3">CNIC Front Image</h4>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
-                      {profile?.cnicFrontImage ? (
+                      {profile?.cnicFront ? (
                         <img
-                          src={profile.cnicFrontImage}
+                          src={profile.cnicFront}
                           alt="CNIC Front"
                           className="w-full h-48 object-cover rounded-lg shadow-md"
                         />
@@ -236,9 +236,9 @@ const UserProfile = () => {
                   <div>
                     <h4 className="text-lg font-medium text-gray-700 mb-3">CNIC Back Image</h4>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
-                      {profile?.cnicBackImage ? (
+                      {profile?.cnicBack ? (
                         <img
-                          src={profile.cnicBackImage}
+                          src={profile.cnicBack}
                           alt="CNIC Back"
                           className="w-full h-48 object-cover rounded-lg shadow-md"
                         />
