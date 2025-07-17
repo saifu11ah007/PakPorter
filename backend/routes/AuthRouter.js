@@ -1,7 +1,7 @@
 import express from 'express';
 import { signup, verifyOTP, resendOTP, completeSignup, login } from '../controllers/AuthController.js';
 import { verifyUser, getAllUsers, getProfile } from '../controllers/AdminController.js';
-import authMiddleware from '../middleware/AuthValidation.js';
+import {authMiddleware} from '../middleware/AuthValidation.js';
 import upload, { saveToBlob } from '../middleware/upload.js';
 const router = express.Router();
 
