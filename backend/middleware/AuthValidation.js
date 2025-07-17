@@ -1,5 +1,5 @@
 import Joi from 'joi';
-
+import jwt from 'jsonwebtoken';
 const signupValidation = (req, res, next) => {
   const schema = Joi.object({
     fullName: Joi.string().min(3).max(100).required(),
