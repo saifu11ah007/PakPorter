@@ -77,7 +77,7 @@ const PakPorterLogin = () => {
       if (!response.ok) {
         throw new Error(result.message || 'Login failed');
       }
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', result.token);
       // Store token and timestamp
       localStorage.setItem('authToken', result.token);
       localStorage.setItem('tokenTimestamp', Date.now().toString());
