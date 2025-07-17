@@ -33,7 +33,7 @@ const UserProfile = () => {
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://pak-porter.vercel.app/auth/profile', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/profile`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

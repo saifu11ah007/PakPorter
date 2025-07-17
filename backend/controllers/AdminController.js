@@ -15,6 +15,16 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
+// AuthController.js
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching profile', error: err.message });
+  }
+};
 
 const verifyUser = async (req, res) => {
   try {
@@ -62,4 +72,4 @@ const verifyUser = async (req, res) => {
   }
 };
 
-export { getAllUsers, verifyUser }; // Use ES Module export
+export { getAllUsers, verifyUser, getProfile }; // Use ES Module export
