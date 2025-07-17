@@ -1,16 +1,20 @@
 import React from 'react';
 import { Truck, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('token'); // Use 'token' for consistency
+  const isLoggedIn = !!localStorage.getItem('token');
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenTimestamp');
-    alert('Logged out successfully!');
-    navigate('/login');
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('tokenTimestamp');
+      alert('Logged out successfully!');
+      navigate('/login', { replace: true }); // Use replace to prevent back navigation
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -26,10 +30,10 @@ const Navbar = () => {
             </span>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
-            <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</a>
-            <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
-            <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">Services</Link>
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</Link>
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</Link>
+            <Link to="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</Link>
             {isLoggedIn && (
               <button
                 onClick={() => navigate('/user/profile')}
