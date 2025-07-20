@@ -93,16 +93,7 @@ const MyWishesPage = () => {
   // Check if user is logged in
   const token = localStorage.getItem('token');
   
-  useEffect(() => {
-    if (!token) {
-      setError('Please log in to view your wishes');
-      setLoading(false);
-      return;
-    }
-    fetchMyWishes();
-  }, [token]);
-
-  const fetchMyWishes = async () => {
+  const fetchMyWishes = useCallback(async () => {
     try {
       const response = await fetch('https://pak-porter.vercel.app/wish/my', {
         headers: {
@@ -123,7 +114,16 @@ const MyWishesPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+  
+  useEffect(() => {
+    if (!token) {
+      setError('Please log in to view your wishes');
+      setLoading(false);
+      return;
+    }
+    fetchMyWishes();
+  }, [token, fetchMyWishes]);
 
   const handleDeleteWish = async (wishId) => {
     if (!window.confirm('Are you sure you want to delete this wish? This action cannot be undone.')) {
