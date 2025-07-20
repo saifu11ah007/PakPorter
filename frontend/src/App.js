@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard.js';
 import RequireAdminAuth from './utils/RequireAdminAuth.js';
 import UserProfile from './pages/UserProfile.js';
 import PostWish from './pages/ProductWish.js';
+import MyWishesPage from './pages/mywishes.js';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -32,6 +33,7 @@ function App() {
         />
         <Route path="/" element={<PakPorterHomepage />} />
         <Route path="/product/wish/post" element={<PostWish />} />
+        <Route path="/my-wishes" element={<MyWishesPage />} />
         <Route
           path="/login"
           element={
