@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  CreditCard, 
-  MapPin, 
-  Shield, 
-  LogOut, 
-  Loader2,
-  CheckCircle,
-  XCircle,
-  AlertCircle
-} from 'lucide-react';
+import { User, Mail, Phone, CreditCard, MapPin, Shield, LogOut, Loader2,CheckCircle, XCircle,AlertCircle} from 'lucide-react';
 
 const UserProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -52,7 +40,7 @@ const UserProfile = () => {
         throw new Error('Failed to fetch profile');
       }
       const data = await response.json(); // Read body once as JSON
-      console.log('Response body:', data); // Debug JSON data
+      console.log('Response body:', data); // Debug JSON data         
       setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
