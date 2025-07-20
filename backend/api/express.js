@@ -4,7 +4,7 @@ import express from 'express';
        import connectDB from '../config/db.js';
        import AuthRouter from '../routes/AuthRouter.js';
        import serverless from 'serverless-http';
-
+import WishRouter from '../controllers/WishController.js';
        dotenv.config();
        const app = express();
 
@@ -18,7 +18,7 @@ import express from 'express';
        app.get('/', (req, res) => res.send('PakPorter'));
 
        app.use('/auth', AuthRouter);
-
+      app.use('/wish',WishRouter);
        async function startServer() {
          try {
            await connectDB();
