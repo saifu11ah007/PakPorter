@@ -22,7 +22,7 @@ const MyWishesPage = () => {
   
   const fetchMyWishes = useCallback(async () => {
     try {
-      const response = await fetch('https://pak-porter.vercel.app/wish/my', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -110,7 +110,7 @@ const PostWish = () => {
         images: selectedImages
       };
 
-      const response = await fetch('https://pak-porter.vercel.app/wish', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
