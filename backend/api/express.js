@@ -4,7 +4,7 @@ import express from 'express';
        import connectDB from '../config/db.js';
        import AuthRouter from '../routes/AuthRouter.js';
        import serverless from 'serverless-http';
-import WishRouter from '../controllers/WishController.js';
+import WishRouter from '../routes/WishRouter.js';
        dotenv.config();
        const app = express();
 
