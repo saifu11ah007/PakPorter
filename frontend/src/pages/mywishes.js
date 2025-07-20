@@ -1,77 +1,4 @@
-import React, { useState, useEffect } from 'react';
-// Note: Using simple custom components since shadcn/ui may not be fully available
-const Card = ({ children, className = "" }) => (
-  <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
-    {children}
-  </div>
-);
-
-const CardHeader = ({ children, className = "" }) => (
-  <div className={`p-6 pb-0 ${className}`}>
-    {children}
-  </div>
-);
-
-const CardTitle = ({ children, className = "" }) => (
-  <h3 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>
-    {children}
-  </h3>
-);
-
-const CardContent = ({ children, className = "" }) => (
-  <div className={`p-6 ${className}`}>
-    {children}
-  </div>
-);
-
-const Badge = ({ children, className = "" }) => (
-  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${className}`}>
-    {children}
-  </span>
-);
-
-const Button = ({ children, className = "", variant = "default", size = "default", disabled = false, onClick, ...props }) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
-  
-  const variants = {
-    default: "bg-blue-600 text-white hover:bg-blue-700",
-    outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
-  };
-  
-  const sizes = {
-    default: "h-10 px-4 py-2",
-    sm: "h-8 px-3 text-xs"
-  };
-  
-  return (
-    <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
-      disabled={disabled}
-      onClick={onClick}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-
-// Simple Alert Dialog components
-const AlertDialog = ({ children }) => children;
-
-const AlertDialogTrigger = ({ asChild, children }) => children;
-
-const AlertDialogContent = ({ children }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  return null; // Simplified for now - will implement modal later if needed
-};
-
-const AlertDialogHeader = ({ children }) => <div>{children}</div>;
-const AlertDialogTitle = ({ children }) => <h2 className="text-lg font-semibold">{children}</h2>;
-const AlertDialogDescription = ({ children }) => <p className="text-sm text-gray-600">{children}</p>;
-const AlertDialogFooter = ({ children }) => <div className="flex gap-2 justify-end">{children}</div>;
-const AlertDialogCancel = ({ children }) => <Button variant="outline">{children}</Button>;
-const AlertDialogAction = ({ children, onClick, className = "" }) => 
-  <Button onClick={onClick} className={className}>{children}</Button>;
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Trash2, 
   Edit, 
@@ -196,9 +123,9 @@ const MyWishesPage = () => {
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-700 mb-2">Access Denied</h2>
             <p className="text-gray-500 mb-6">Please log in to view your wishes</p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
               Go to Login
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -230,15 +157,15 @@ const MyWishesPage = () => {
                 Manage all your product requests in one place
               </p>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors">
               <Plus className="w-4 h-4" />
               Post New Wish
-            </Button>
+            </button>
           </div>
           
           {wishes.length > 0 && (
             <div className="mt-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <Package className="w-5 h-5 text-blue-600" />
                   <span className="font-semibold text-gray-900">
@@ -259,14 +186,14 @@ const MyWishesPage = () => {
 
         {/* Empty State */}
         {!loading && wishes.length === 0 && !error && (
-          <div className="text-center py-16 bg-white rounded-lg border border-gray-200">
+          <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No wishes yet</h3>
             <p className="text-gray-500 mb-6">Start by posting your first product request</p>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
-              <Plus className="w-4 h-4 mr-2" />
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition-colors">
+              <Plus className="w-4 h-4" />
               Create Your First Wish
-            </Button>
+            </button>
           </div>
         )}
 
@@ -274,21 +201,21 @@ const MyWishesPage = () => {
         {wishes.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {wishes.map((wish) => (
-              <Card key={wish.id} className="bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-200">
-                <CardHeader className="pb-3">
+              <div key={wish.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
+                {/* Card Header */}
+                <div className="p-6 pb-3">
                   <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg font-semibold text-gray-900 line-clamp-2">
+                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1 mr-2">
                       {wish.title || wish.productTitle || 'Untitled Wish'}
-                    </CardTitle>
-                    <Badge 
-                      className={`ml-2 text-xs font-medium border ${getStatusBadgeColor(wish.status)}`}
-                    >
+                    </h3>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusBadgeColor(wish.status)}`}>
                       {wish.status || 'Open'}
-                    </Badge>
+                    </span>
                   </div>
-                </CardHeader>
+                </div>
                 
-                <CardContent className="pt-0">
+                {/* Card Content */}
+                <div className="p-6 pt-0">
                   {/* Description */}
                   {wish.description && (
                     <p className="text-gray-600 text-sm mb-4 line-clamp-3">
@@ -300,7 +227,7 @@ const MyWishesPage = () => {
                   <div className="space-y-3 mb-4">
                     {/* Price */}
                     <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-green-600" />
+                      <DollarSign className="w-4 h-4 text-green-600 flex-shrink-0" />
                       <span className="text-gray-700">
                         <strong>Budget:</strong> {formatPrice(wish.basePrice || wish.price)}
                       </span>
@@ -309,7 +236,7 @@ const MyWishesPage = () => {
                     {/* Category */}
                     {wish.category && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Package className="w-4 h-4 text-blue-600" />
+                        <Package className="w-4 h-4 text-blue-600 flex-shrink-0" />
                         <span className="text-gray-700">
                           <strong>Category:</strong> {wish.category}
                         </span>
@@ -319,7 +246,7 @@ const MyWishesPage = () => {
                     {/* City */}
                     {wish.city && (
                       <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-red-600" />
+                        <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
                         <span className="text-gray-700">
                           <strong>City:</strong> {wish.city}
                         </span>
@@ -328,7 +255,7 @@ const MyWishesPage = () => {
                     
                     {/* Deadline */}
                     <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-purple-600" />
+                      <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
                       <span className="text-gray-700">
                         <strong>Deadline:</strong> {formatDate(wish.deadline)}
                       </span>
@@ -338,30 +265,22 @@ const MyWishesPage = () => {
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-3 border-t border-gray-100">
                     {/* View Bids Button */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
+                    <button className="flex-1 h-8 px-3 text-xs border border-blue-200 bg-white hover:bg-blue-50 text-blue-600 rounded-md inline-flex items-center justify-center gap-1 transition-colors">
+                      <Eye className="w-4 h-4" />
                       View Bids
-                    </Button>
+                    </button>
                     
                     {/* Edit Button */}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
+                    <button 
                       disabled
-                      className="text-gray-400 border-gray-200"
+                      className="h-8 px-3 text-xs border border-gray-200 bg-white text-gray-400 rounded-md inline-flex items-center justify-center cursor-not-allowed"
                     >
                       <Edit className="w-4 h-4" />
-                    </Button>
+                    </button>
                     
                     {/* Delete Button */}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="text-red-600 border-red-200 hover:bg-red-50"
+                    <button 
+                      className="h-8 px-3 text-xs border border-red-200 bg-white hover:bg-red-50 text-red-600 rounded-md inline-flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       disabled={deleteLoading === wish.id}
                       onClick={() => handleDeleteWish(wish.id)}
                     >
@@ -370,10 +289,10 @@ const MyWishesPage = () => {
                       ) : (
                         <Trash2 className="w-4 h-4" />
                       )}
-                    </Button>
+                    </button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         )}
