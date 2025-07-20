@@ -5,7 +5,7 @@ import connectDB from './config/db.js';
 import bodyParser  from 'body-parser';
 import AuthRouter from './routes/AuthRouter.js';
 import sendEmailOTP from './config/OTP.js';
-
+import WishRouter from './routes/WishRouter.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +26,7 @@ async function startServer() {
     process.exit(1);
   }
 }
-app.use('/auth',AuthRouter)
+app.use('/auth',AuthRouter);
+app.use('/wish',WishRouter);
 
 startServer();
