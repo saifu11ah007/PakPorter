@@ -11,10 +11,23 @@ const createWish = asyncHandler(async (req, res) => {
   console.log('User:', req.user); // Debug log
 
   const { title, description, basePrice, deliveryDeadline, productLink } = req.body;
-  const location = {
-    country: req.body['location[country]'],
-    city: req.body['location[city]']
-  };
+  
+  // Fix: Handle location object properly
+  let location;
+  if (req.body.location && typeof req.body.location === 'object') {
+    // Location is already parsed as an object
+    location = {
+      country: req.body.location.country,
+      city: req.body.location.city
+    };
+  } else {
+    // Fallback to bracket notation if needed
+    location = {
+      country: req.body['location[country]'],
+      city: req.body['location[city]']
+    };
+  }
+  
   const images = req.body.imageUrls || [];
 
   // Validate required fields
