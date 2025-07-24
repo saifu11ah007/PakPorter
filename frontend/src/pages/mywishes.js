@@ -1,6 +1,5 @@
 import  { useState, useEffect, useCallback } from 'react';
 import { 
-
   Eye, 
   Calendar, 
   MapPin, 
@@ -17,8 +16,6 @@ const MyWishesPage = () => {
   const [wishes, setWishes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [deleteLoading, setDeleteLoading] = useState(null);
-
   // Check if user is logged in
   const token = localStorage?.getItem('token');
   
@@ -54,34 +51,6 @@ const MyWishesPage = () => {
     fetchMyWishes();
   }, [token, fetchMyWishes]);
 
-  const handleDeleteWish = async (wishId) => {
-    if (!window.confirm('Are you sure you want to delete this wish? This action cannot be undone.')) {
-      return;
-    }
-
-    setDeleteLoading(wishId);
-    try {
-      const response = await fetch(`https://pak-porter.vercel.app/wish/${wishId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete wish');
-      }
-
-      // Remove the deleted wish from state
-      setWishes(wishes.filter(wish => wish.id !== wishId));
-    } catch (err) {
-      console.error('Error deleting wish:', err);
-      alert('Failed to delete wish. Please try again.');
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
 
   const getStatusBadgeColor = (isFulfilled) => {
     if (isFulfilled) {
@@ -109,9 +78,9 @@ const MyWishesPage = () => {
     return `PKR ${parseInt(price).toLocaleString()}`;
   };
 
-  const getStatusText = (isFulfilled) => {
-    return isFulfilled ? 'Fulfilled' : 'Open';
-  };
+  // const getStatusText = (isFulfilled) => {
+  //   return isFulfilled ? 'Fulfilled' : 'Open';
+  // };
 
   if (!token) {
     return (
