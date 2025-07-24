@@ -257,7 +257,7 @@ const MyWishesPage = () => {
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
                       <span className="text-gray-700">
-                        <strong>Deadline:</strong> {formatDate(wish.deadline)}
+                        <strong>Deadline:</strong> {formatDate(wish.deliveryDeadline)}
                       </span>
                     </div>
                   </div>
