@@ -28,7 +28,11 @@ const createWish = asyncHandler(async (req, res) => {
     };
   }
   
-  const images = req.body.imageUrls || [];
+  // Handle images - filter out any empty or invalid URLs
+  const images = (req.body.imageUrls || []).filter(url => 
+    url && typeof url === 'string' && url.trim() !== '' && 
+    /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!  const images = req.body.imageUrls || [];'()*+,;=.]+$/.test(url)
+  );
 
   // Validate required fields
   if (!title || !description || !basePrice || !deliveryDeadline || !location.country || !location.city) {

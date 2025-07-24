@@ -38,26 +38,55 @@ const upload = multer({
 
 export const saveProductImagesToBlob = async (req, res, next) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return next();
+    // Initialize imageUrls as empty array
+    req.body.imageUrls = [];
+    
+    // Only process if files exist and have length > 0
+    if (req.files && req.files.length > 0) {
+      const imageUrls = [];
+      
+      for (const file of req.files) {
+        try {
+          const fileBuffer = fs.readFileSync(file.path);
+          const { url } = await put(`product-wish/${uuidv4()}-${file.originalname}`, fileBuffer, {
+            access: 'public',
+            token: process.env.BLOB_READ_WRITE_TOKEN,
+            addRandomSuffix: true
+          });
+          
+          // Only add valid URLs
+          if (url && typeof url === 'string' && url.trim() !== '') {
+            imageUrls.push(url);
+          }
+          
+          // Clean up temp file
+          fs.unlinkSync(file.path);
+        } catch (fileError) {
+          console.error('Error processing file:', file.filename, fileError);
+          // Clean up temp file even if processing failed
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        }
+      }
+
+      req.body.imageUrls = imageUrls;
     }
 
-    const imageUrls = [];
-    for (const file of req.files) {
-      const fileBuffer = fs.readFileSync(file.path);
-      const { url } = await put(`product-wish/${uuidv4()}-${file.originalname}`, fileBuffer, {
-        access: 'public',
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-        addRandomSuffix: true
-      });
-      imageUrls.push(url);
-      fs.unlinkSync(file.path);
-    }
-
-    req.body.imageUrls = imageUrls;
+    console.log('Processed image URLs:', req.body.imageUrls); // Debug log
     next();
   } catch (error) {
     console.error('Product image upload error:', error);
+    
+    // Clean up any remaining temp files
+    if (req.files && req.files.length > 0) {
+      req.files.forEach(file => {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      });
+    }
+    
     res.status(500).json({ message: 'Product image upload error', error: error.message });
   }
 };

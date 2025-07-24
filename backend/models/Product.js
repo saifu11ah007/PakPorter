@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
     required: false,
     validate: {
       validator: function (v) {
-        if (!v) return true;
+        if (!v || v.trim() === '') return true;
         return /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(v);
       },
       message: 'Invalid product link URL'
@@ -43,7 +43,8 @@ const productSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator: function (v) {
-        if (!v) return true;
+        // Allow empty array, but validate non-empty strings
+        if (!v || v.trim() === '') return false;
         return /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(v);
       },
       message: 'Invalid image URL'
@@ -71,6 +72,21 @@ const productSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+});
+
+// Pre-save middleware to clean up images array
+productSchema.pre('save', function(next) {
+  if (this.images && this.images.length > 0) {
+    // Filter out empty strings and invalid URLs
+    this.images = this.images.filter(url => 
+      url && typeof url === 'string' && url.trim() !== '' &&
+      /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(url)
+    );
+  } else {
+    // Ensure images is an empty array if no valid images
+    this.images = [];
+  }
+  next();
 });
 
 productSchema.index({ createdBy: 1 });
