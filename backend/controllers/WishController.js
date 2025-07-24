@@ -106,6 +106,7 @@ const deleteWish = asyncHandler(async (req, res) => {
   res.json({ message: 'Wish deleted successfully' });
 });
 const getMyWishes = asyncHandler(async (req, res) => {
+  console.log('getMyWishes: User ID:', req.user._id); // Debug
   if (!req.user || !req.user._id) {
     res.status(401);
     throw new Error('User not authenticated');
@@ -113,6 +114,7 @@ const getMyWishes = asyncHandler(async (req, res) => {
   const wishes = await Product.find({ createdBy: req.user._id })
     .populate('createdBy', 'username')
     .sort({ createdAt: -1 });
+  console.log('getMyWishes: Fetched wishes:', wishes); // Debug
   res.json(wishes);
 });
 export { createWish, getWishes, getWishById, updateWish, deleteWish, getMyWishes };

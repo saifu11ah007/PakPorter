@@ -7,9 +7,8 @@ import {
   deleteWish,
   getMyWishes
 } from '../controllers/WishController.js';
-import authMiddleware from '../middleware/AuthValidation.js'; // Adjust path based on your project structure
-import { wishMiddleware } from '../middleware/WishValidation.js';
-
+import authMiddleware from '../middleware/AuthValidation.js'; 
+import wishMiddleware from '../middleware/WishValidation.js';
 const router = express.Router();
 
 // Routes
