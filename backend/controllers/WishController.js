@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import asyncHandler from 'express-async-handler';
+import mongoose from 'mongoose';
 
 // @desc    Create a new wish
 // @route   POST /wish
@@ -22,7 +23,7 @@ const createWish = asyncHandler(async (req, res) => {
     productLink,
     images,
     location,
-    createdBy: req.user._id, // Assumes req.user is set by protect middleware
+    createdBy: req.user._id,
   });
 
   res.status(201).json(wish);
@@ -33,8 +34,8 @@ const createWish = asyncHandler(async (req, res) => {
 // @access  Public
 const getWishes = asyncHandler(async (req, res) => {
   const wishes = await Product.find({})
-    .populate('createdBy', 'username') // Populate creator's username
-    .sort({ createdAt: -1 }); // Sort by newest first
+    .populate('createdBy', 'username')
+    .sort({ createdAt: -1 });
   res.json(wishes);
 });
 
@@ -42,9 +43,14 @@ const getWishes = asyncHandler(async (req, res) => {
 // @route   GET /wish/:id
 // @access  Public
 const getWishById = asyncHandler(async (req, res) => {
+  // Validate ObjectId
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400);
+    throw new Error('Invalid wish ID');
+  }
+
   const wish = await Product.findById(req.params.id)
-    .populate('createdBy', 'username')
-    .populate('acceptedBid'); // Populate accepted bid if any
+    .populate('createdBy', 'username');
 
   if (!wish) {
     res.status(404);
@@ -58,6 +64,12 @@ const getWishById = asyncHandler(async (req, res) => {
 // @route   PUT /wish/:id
 // @access  Private
 const updateWish = asyncHandler(async (req, res) => {
+  // Validate ObjectId
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400);
+    throw new Error('Invalid wish ID');
+  }
+
   const wish = await Product.findById(req.params.id);
 
   if (!wish) {
@@ -89,6 +101,12 @@ const updateWish = asyncHandler(async (req, res) => {
 // @route   DELETE /wish/:id
 // @access  Private
 const deleteWish = asyncHandler(async (req, res) => {
+  // Validate ObjectId
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400);
+    throw new Error('Invalid wish ID');
+  }
+
   const wish = await Product.findById(req.params.id);
 
   if (!wish) {
@@ -106,4 +124,20 @@ const deleteWish = asyncHandler(async (req, res) => {
   res.json({ message: 'Wish deleted successfully' });
 });
 
-export { createWish, getWishes, getWishById, updateWish, deleteWish };
+// @desc    Get all wishes for the authenticated user
+// @route   GET /wish/my-wishes
+// @access  Private
+const getMyWishes = asyncHandler(async (req, res) => {
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error('User not authenticated');
+  }
+
+  const wishes = await Product.find({ createdBy: req.user._id })
+    .populate('createdBy', 'username')
+    .sort({ createdAt: -1 });
+
+  res.json(wishes);
+});
+
+export { createWish, getWishes, getWishById, updateWish, deleteWish, getMyWishes };

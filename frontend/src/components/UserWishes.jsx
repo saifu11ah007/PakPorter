@@ -12,7 +12,7 @@ const UserWishes = () => {
     const fetchWishes = async () => {
       try {
         setLoading(true);
-        const apiUrl = `${process.env.REACT_APP_API_URL}/wish/my-wishes`;
+        const apiUrl = `${process.env.REACT_APP_API_URL}/wish/wishes/my-wishes`;
         console.log('Fetching wishes from:', apiUrl); // Debug URL
         console.log('Token:', localStorage.getItem('token')); // Debug token
         const response = await axios.get(apiUrl, {
