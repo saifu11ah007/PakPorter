@@ -10,9 +10,7 @@ import {
   Plus,
   Loader2,
   Sparkles,
-  Star,
-  TrendingUp,
-  Heart
+  TrendingUp
 } from 'lucide-react';
 
 const MyWishesPage = () => {
