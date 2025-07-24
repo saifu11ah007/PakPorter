@@ -97,26 +97,27 @@ const PostWish = () => {
     try {
       const token = localStorage.getItem('authToken');
       
-      const payload = {
-        title: formData.title,
-        description: formData.description,
-        basePrice: parseFloat(formData.basePrice),
-        deliveryDeadline: formData.deliveryDeadline,
-        productLink: formData.productLink || undefined,
-        location: {
-          country: formData.country,
-          city: formData.city
-        },
-        images: selectedImages
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('basePrice', parseFloat(formData.basePrice));
+      formDataToSend.append('deliveryDeadline', formData.deliveryDeadline);
+      if (formData.productLink) formDataToSend.append('productLink', formData.productLink);
+      formDataToSend.append('location[country]', formData.country);
+      formDataToSend.append('location[city]', formData.city);
+
+      // Append images to FormData
+      const imageInputs = document.querySelector('input[type="file"]').files;
+      for (const file of imageInputs) {
+        formDataToSend.append('images', file);
+      }
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(payload)
+        body: formDataToSend
       });
 
       if (!response.ok) {
