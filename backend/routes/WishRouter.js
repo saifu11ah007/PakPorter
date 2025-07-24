@@ -30,7 +30,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // POST /wish - Create a new product wish
-router.post('/wish', authenticateToken, upload, saveProductImagesToBlob, async (req, res) => {
+router.post('/', authenticateToken, upload, saveProductImagesToBlob, async (req, res) => {
   try {
     const { title, description, basePrice, deliveryDeadline, productLink } = req.body;
     const location = JSON.parse(req.body['location'] || '{}'); // Parse location from FormData
