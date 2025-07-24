@@ -6,12 +6,20 @@ import mongoose from 'mongoose';
 // @route   POST /wish
 // @access  Private
 const createWish = asyncHandler(async (req, res) => {
+  console.log('Request body:', req.body); // Debug log
+  console.log('Image URLs:', req.body.imageUrls); // Debug log
+  console.log('User:', req.user); // Debug log
+
   const { title, description, basePrice, deliveryDeadline, productLink } = req.body;
-  const location = JSON.parse(req.body['location'] || '{}'); // Parse location from FormData
-  const images = req.body.imageUrls || []; // Get image URLs from middleware
+  const location = {
+    country: req.body['location[country]'],
+    city: req.body['location[city]']
+  };
+  const images = req.body.imageUrls || [];
 
   // Validate required fields
-  if (!title || !description || !basePrice || !deliveryDeadline || !location?.country || !location?.city) {
+  if (!title || !description || !basePrice || !deliveryDeadline || !location.country || !location.city) {
+    console.log('Missing fields:', { title, description, basePrice, deliveryDeadline, location }); // Debug log
     res.status(400);
     throw new Error('Please provide all required fields');
   }
@@ -19,9 +27,10 @@ const createWish = asyncHandler(async (req, res) => {
   // Validate delivery deadline
   const deadlineDate = new Date(deliveryDeadline);
   const today = new Date();
-  if (deadlineDate <= today) {
+  if (isNaN(deadlineDate) || deadlineDate <= today) {
+    console.log('Invalid deadline:', deliveryDeadline); // Debug log
     res.status(400);
-    throw new Error('Delivery deadline must be in the future');
+    throw new Error('Delivery deadline must be a valid date in the future');
   }
 
   // Create new wish

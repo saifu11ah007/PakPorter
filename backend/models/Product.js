@@ -10,6 +10,7 @@ const productSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true,
+    trim: true,
     maxlength: 1000
   },
   basePrice: {
@@ -19,24 +20,38 @@ const productSchema = new mongoose.Schema({
   },
   deliveryDeadline: {
     type: Date,
-    required: true
+    required: true,
+    validate: {
+      validator: function (v) {
+        return v > new Date();
+      },
+      message: 'Delivery deadline must be in the future'
+    }
   },
   productLink: {
     type: String,
     required: false,
     validate: {
       validator: function (v) {
+        if (!v) return true;
         return /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(v);
       },
       message: 'Invalid product link URL'
     }
   },
   images: [{
-    type: String // URLs or file paths for product reference images
+    type: String,
+    validate: {
+      validator: function (v) {
+        if (!v) return true;
+        return /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(v);
+      },
+      message: 'Invalid image URL'
+    }
   }],
   location: {
-    country: { type: String, required: true },
-    city: { type: String, required: true }
+    country: { type: String, required: true, trim: true, lowercase: true },
+    city: { type: String, required: true, trim: true, lowercase: true }
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -49,7 +64,7 @@ const productSchema = new mongoose.Schema({
   },
   acceptedBid: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Bid', // Will link to the accepted bid (if any)
+    ref: 'Bid',
     default: null
   },
   createdAt: {
@@ -57,6 +72,9 @@ const productSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+productSchema.index({ createdBy: 1 });
+productSchema.index({ createdAt: -1 });
 
 const Product = mongoose.model('Product', productSchema);
 

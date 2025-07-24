@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 
-// Ensure the /tmp/uploads/ directory exists
 const uploadDir = '/tmp/uploads/';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -23,8 +22,8 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit per file
-    files: 5 // Maximum 5 files
+    fileSize: 5 * 1024 * 1024,
+    files: 5
   },
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
@@ -45,14 +44,13 @@ export const saveProductImagesToBlob = async (req, res, next) => {
 
     const imageUrls = [];
     for (const file of req.files) {
-      const fileBuffer = fs.readFileSync(file.path); // Read the file from disk
+      const fileBuffer = fs.readFileSync(file.path);
       const { url } = await put(`product-wish/${uuidv4()}-${file.originalname}`, fileBuffer, {
         access: 'public',
         token: process.env.BLOB_READ_WRITE_TOKEN,
         addRandomSuffix: true
       });
       imageUrls.push(url);
-      // Clean up the temporary file
       fs.unlinkSync(file.path);
     }
 
