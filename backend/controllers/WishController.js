@@ -1,43 +1,31 @@
 import Product from '../models/Product.js';
 import asyncHandler from 'express-async-handler';
-import mongoose from 'mongoose';
 
 // @desc    Create a new wish
 // @route   POST /wish
 // @access  Private
 const createWish = asyncHandler(async (req, res) => {
-  console.log('createWish: Request body:', req.body); // Debug
-  console.log('createWish: User:', req.user); // Debug
-
   const { title, description, basePrice, deliveryDeadline, productLink, images, location } = req.body;
 
+  // Validate required fields
   if (!title || !description || !basePrice || !deliveryDeadline || !location?.country || !location?.city) {
     res.status(400);
     throw new Error('Please provide all required fields');
   }
 
-  if (!req.user || !req.user._id) {
-    res.status(401);
-    throw new Error('User not authenticated');
-  }
+  // Create new wish
+  const wish = await Product.create({
+    title,
+    description,
+    basePrice,
+    deliveryDeadline,
+    productLink,
+    images,
+    location,
+    createdBy: req.user._id, // Assumes req.user is set by protect middleware
+  });
 
-  try {
-    const wish = await Product.create({
-      title,
-      description,
-      basePrice,
-      deliveryDeadline,
-      productLink,
-      images,
-      location,
-      createdBy: req.user._id,
-    });
-    console.log('createWish: Wish created:', wish); // Debug
-    res.status(201).json(wish);
-  } catch (error) {
-    console.error('createWish: Error creating wish:', error); // Debug
-    throw error; // Let asyncHandler handle the error
-  }
+  res.status(201).json(wish);
 });
 
 // @desc    Get all wishes
@@ -45,8 +33,8 @@ const createWish = asyncHandler(async (req, res) => {
 // @access  Public
 const getWishes = asyncHandler(async (req, res) => {
   const wishes = await Product.find({})
-    .populate('createdBy', 'username')
-    .sort({ createdAt: -1 });
+    .populate('createdBy', 'username') // Populate creator's username
+    .sort({ createdAt: -1 }); // Sort by newest first
   res.json(wishes);
 });
 
@@ -54,14 +42,9 @@ const getWishes = asyncHandler(async (req, res) => {
 // @route   GET /wish/:id
 // @access  Public
 const getWishById = asyncHandler(async (req, res) => {
-  console.log('getWishById: ID:', req.params.id); // Debug
-  if (!mongoose.isValidObjectId(req.params.id)) {
-    res.status(400);
-    throw new Error('Invalid wish ID');
-  }
   const wish = await Product.findById(req.params.id)
     .populate('createdBy', 'username')
-    .populate('acceptedBid');
+    .populate('acceptedBid'); // Populate accepted bid if any
 
   if (!wish) {
     res.status(404);
@@ -75,10 +58,6 @@ const getWishById = asyncHandler(async (req, res) => {
 // @route   PUT /wish/:id
 // @access  Private
 const updateWish = asyncHandler(async (req, res) => {
-  if (!mongoose.isValidObjectId(req.params.id)) {
-    res.status(400);
-    throw new Error('Invalid wish ID');
-  }
   const wish = await Product.findById(req.params.id);
 
   if (!wish) {
@@ -86,11 +65,13 @@ const updateWish = asyncHandler(async (req, res) => {
     throw new Error('Wish not found');
   }
 
+  // Check if user is the creator
   if (wish.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to update this wish');
   }
 
+  // Update fields
   const { title, description, basePrice, deliveryDeadline, productLink, images, location } = req.body;
   wish.title = title || wish.title;
   wish.description = description || wish.description;
@@ -108,10 +89,6 @@ const updateWish = asyncHandler(async (req, res) => {
 // @route   DELETE /wish/:id
 // @access  Private
 const deleteWish = asyncHandler(async (req, res) => {
-  if (!mongoose.isValidObjectId(req.params.id)) {
-    res.status(400);
-    throw new Error('Invalid wish ID');
-  }
   const wish = await Product.findById(req.params.id);
 
   if (!wish) {
@@ -119,6 +96,7 @@ const deleteWish = asyncHandler(async (req, res) => {
     throw new Error('Wish not found');
   }
 
+  // Check if user is the creator
   if (wish.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to delete this wish');
@@ -128,20 +106,4 @@ const deleteWish = asyncHandler(async (req, res) => {
   res.json({ message: 'Wish deleted successfully' });
 });
 
-// @desc    Get all wishes for the authenticated user
-// @route   GET /wish/my-wishes
-// @access  Private
-const getMyWishes = asyncHandler(async (req, res) => {
-  console.log('getMyWishes: User ID:', req.user._id); // Debug
-  if (!req.user || !req.user._id) {
-    res.status(401);
-    throw new Error('User not authenticated');
-  }
-  const wishes = await Product.find({ createdBy: req.user._id })
-    .populate('createdBy', 'username')
-    .sort({ createdAt: -1 });
-  console.log('getMyWishes: Fetched wishes:', wishes); // Debug
-  res.json(wishes);
-});
-
-export { createWish, getWishes, getWishById, updateWish, deleteWish, getMyWishes };
+export { createWish, getWishes, getWishById, updateWish, deleteWish };
