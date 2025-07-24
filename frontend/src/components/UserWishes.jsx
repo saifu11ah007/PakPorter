@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserWishes = () => {
@@ -12,15 +12,20 @@ const UserWishes = () => {
     const fetchWishes = async () => {
       try {
         setLoading(true);
-        // Use the new my-wishes endpoint
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/wish/my-wishes`, {
+        const apiUrl = `${process.env.REACT_APP_API_URL}/wish/my-wishes`;
+        console.log('Fetching wishes from:', apiUrl); // Debug URL
+        console.log('Token:', localStorage.getItem('token')); // Debug token
+        const response = await axios.get(apiUrl, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
+        console.log('Response data:', response.data); // Debug response
         setWishes(response.data);
         setLoading(false);
       } catch (err) {
+        console.error('Fetch error:', err);
+        console.error('Error response:', err.response); // Debug full error response
         setError(err.response?.data?.message || 'Error fetching wishes');
         setLoading(false);
       }
@@ -40,17 +45,15 @@ const UserWishes = () => {
         });
         setWishes(wishes.filter((wish) => wish._id !== id));
       } catch (err) {
+        console.error('Delete error:', err);
         setError(err.response?.data?.message || 'Error deleting wish');
       }
     }
   };
 
-  // Handle update wish (basic implementation - redirects to an update page)
+  // Handle update wish
   const handleUpdate = (id) => {
-    // In a full implementation, this could redirect to an update form
     alert('Update functionality would open an edit form for wish ID: ' + id);
-    // You could use React Router to navigate to an update page
-    // history.push(`/wish/${id}/edit`);
   };
 
   if (loading) return <div className="text-center mt-8">Loading...</div>;

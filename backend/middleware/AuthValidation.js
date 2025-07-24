@@ -1,5 +1,7 @@
 import Joi from 'joi';
 import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler'; // Add this import
+import User from '../models/User.js'; // Add this import for User model
 const signupValidation = (req, res, next) => {
   const schema = Joi.object({
     fullName: Joi.string().min(3).max(100).required(),
@@ -21,8 +23,14 @@ const authMiddleware = async (req, res, next) => {
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Should include _id
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+    req.user = user;
     next();
   } catch (err) {
+    console.error('Auth middleware error:', err);
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
