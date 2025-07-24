@@ -13,8 +13,8 @@ import { default as upload, saveProductImagesToBlob } from '../middleware/upload
 const router = express.Router();
 
 
+router.post('/', authMiddleware, upload, saveProductImagesToBlob, createWish);
 // POST /wish - Create a new product wish
-router.post('/', authMiddleware,createWish, upload, saveProductImagesToBlob);
 router.get('/', getWishes); // Get all wishes
 router.get('/:id', getWishById); // Get a single wish by ID
 router.put('/:id', authMiddleware, updateWish); // Update a wish (authMiddlewareed)
