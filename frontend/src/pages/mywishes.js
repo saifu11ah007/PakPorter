@@ -8,7 +8,11 @@ import {
   DollarSign, 
   Package,
   Plus,
-  Loader2
+  Loader2,
+  Sparkles,
+  Star,
+  TrendingUp,
+  Heart
 } from 'lucide-react';
 
 const MyWishesPage = () => {
@@ -18,7 +22,7 @@ const MyWishesPage = () => {
   const [deleteLoading, setDeleteLoading] = useState(null);
 
   // Check if user is logged in
-  const token = localStorage.getItem('token');
+  const token = localStorage?.getItem('token');
   
   const fetchMyWishes = useCallback(async () => {
     try {
@@ -85,15 +89,15 @@ const MyWishesPage = () => {
     const statusLower = status?.toLowerCase() || '';
     switch (statusLower) {
       case 'open':
-        return 'bg-green-100 text-green-800 border-green-300';
+        return 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200 shadow-sm';
       case 'closed':
-        return 'bg-red-100 text-red-800 border-red-300';
+        return 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border-red-200 shadow-sm';
       case 'accepted':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
+        return 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border-blue-200 shadow-sm';
       case 'in_progress':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border-yellow-200 shadow-sm';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200 shadow-sm';
     }
   };
 
@@ -117,13 +121,24 @@ const MyWishesPage = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-blue-50 to-cyan-50 p-6 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-4 -left-4 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-8 -right-8 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto relative z-10">
           <div className="text-center py-16">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-700 mb-2">Access Denied</h2>
-            <p className="text-gray-500 mb-6">Please log in to view your wishes</p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur-lg opacity-30 animate-pulse scale-110"></div>
+              <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-full inline-block">
+                <Package className="w-16 h-16 text-white" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">Access Denied</h2>
+            <p className="text-gray-500 mb-8 text-lg">Please log in to view your wishes</p>
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
               Go to Login
             </button>
           </div>
@@ -134,11 +149,19 @@ const MyWishesPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-blue-50 to-cyan-50 p-6 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-4 -left-4 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-8 -right-8 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto relative z-10">
           <div className="text-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600">Loading your wishes...</p>
+            <div className="relative mb-4">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto" />
+              <div className="absolute inset-0 bg-blue-600 rounded-full blur-md opacity-30 animate-ping"></div>
+            </div>
+            <p className="text-gray-600 text-lg">Loading your wishes...</p>
           </div>
         </div>
       </div>
@@ -146,31 +169,55 @@ const MyWishesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-blue-50 to-cyan-50 p-6 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-4 -left-4 w-72 h-72 bg-gradient-to-br from-blue-400/10 to-purple-600/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/3 -right-8 w-64 h-64 bg-gradient-to-br from-cyan-400/10 to-teal-600/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Wishes</h1>
-              <p className="text-gray-600">
-                Manage all your product requests in one place
+        <div className="mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="relative">
+                  <Sparkles className="w-8 h-8 text-blue-600" />
+                  <div className="absolute inset-0 bg-blue-600 rounded-full blur-sm opacity-30 animate-pulse"></div>
+                </div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+                  My Wishes
+                </h1>
+              </div>
+              <p className="text-gray-600 text-lg ml-11">
+                Manage all your product requests in one magical place ✨
               </p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-colors">
-              <Plus className="w-4 h-4" />
-              Post New Wish
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl flex items-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <Plus className="w-5 h-5" />
+              <span className="font-semibold">Post New Wish</span>
             </button>
           </div>
           
           {wishes.length > 0 && (
-            <div className="mt-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-blue-600" />
-                  <span className="font-semibold text-gray-900">
-                    Total Wishes: {wishes.length}
-                  </span>
+            <div className="mt-8">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Package className="w-6 h-6 text-blue-600" />
+                      <div className="absolute inset-0 bg-blue-600 rounded-full blur-sm opacity-30"></div>
+                    </div>
+                    <span className="font-bold text-gray-900 text-lg">
+                      Total Wishes: {wishes.length}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    <span className="text-sm text-gray-600 font-medium">Growing collection</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -179,117 +226,140 @@ const MyWishesPage = () => {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600">{error}</p>
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-6 mb-8 shadow-lg">
+            <p className="text-red-600 font-medium">{error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && wishes.length === 0 && !error && (
-          <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No wishes yet</h3>
-            <p className="text-gray-500 mb-6">Start by posting your first product request</p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2 transition-colors">
-              <Plus className="w-4 h-4" />
-              Create Your First Wish
-            </button>
+          <div className="text-center py-20 bg-white/60 backdrop-blur-sm rounded-3xl border border-white/30 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/50"></div>
+            <div className="relative z-10">
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-2xl opacity-20 scale-150 animate-pulse"></div>
+                <Package className="w-20 h-20 text-gray-400 mx-auto relative z-10" />
+              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">
+                No wishes yet
+              </h3>
+              <p className="text-gray-500 mb-8 text-lg">Start by posting your first magical product request</p>
+              <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl inline-flex items-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <Plus className="w-5 h-5" />
+                <span className="font-semibold">Create Your First Wish</span>
+              </button>
+            </div>
           </div>
         )}
 
         {/* Wishes Grid */}
         {wishes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {wishes.map((wish) => (
-              <div key={wish.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200">
-                {/* Card Header */}
-                <div className="p-6 pb-3">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1 mr-2">
-                      {wish.title || wish.productTitle || 'Untitled Wish'}
-                    </h3>
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusBadgeColor(wish.status)}`}>
-                      {wish.status || 'Open'}
-                    </span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {wishes.map((wish, index) => (
+              <div key={wish.id} className="group relative">
+                {/* Card glow effect */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-all duration-500"></div>
                 
-                {/* Card Content */}
-                <div className="p-6 pt-0">
-                  {/* Description */}
-                  {wish.description && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {wish.description}
-                    </p>
-                  )}
-                  
-                  {/* Details Grid */}
-                  <div className="space-y-3 mb-4">
-                    {/* Price */}
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-700">
-                        <strong>Budget:</strong> {formatPrice(wish.basePrice || wish.price)}
+                <div className="relative bg-white/70 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden">
+                  {/* Card Header with gradient */}
+                  <div className="p-6 pb-4 relative">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-xl font-bold text-gray-900 line-clamp-2 flex-1 mr-3 group-hover:text-blue-900 transition-colors">
+                        {wish.title || wish.productTitle || 'Untitled Wish'}
+                      </h3>
+                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border-2 ${getStatusBadgeColor(wish.status)} transition-all duration-300`}>
+                        {wish.status || 'Open'}
                       </span>
                     </div>
-                    
-                    {/* Category */}
-                    {wish.category && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Package className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                        <span className="text-gray-700">
-                          <strong>Category:</strong> {wish.category}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* City */}
-                    {wish.city && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
-                        <span className="text-gray-700">
-                          <strong>City:</strong> {wish.city}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Deadline */}
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                      <span className="text-gray-700">
-                        <strong>Deadline:</strong> {formatDate(wish.deliveryDeadline)}
-                      </span>
+                    {/* Wish number badge */}
+                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs font-bold w-8 h-8 rounded-full flex items-center justify-center shadow-lg">
+                      {index + 1}
                     </div>
                   </div>
                   
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-3 border-t border-gray-100">
-                    {/* View Bids Button */}
-                    <button className="flex-1 h-8 px-3 text-xs border border-blue-200 bg-white hover:bg-blue-50 text-blue-600 rounded-md inline-flex items-center justify-center gap-1 transition-colors">
-                      <Eye className="w-4 h-4" />
-                      View Bids
-                    </button>
+                  {/* Card Content */}
+                  <div className="p-6 pt-2">
+                    {/* Description */}
+                    {wish.description && (
+                      <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-6">
+                        <p className="text-gray-700 text-sm line-clamp-3 leading-relaxed">
+                          {wish.description}
+                        </p>
+                      </div>
+                    )}
                     
-                    {/* Edit Button */}
-                    <button 
-                      disabled
-                      className="h-8 px-3 text-xs border border-gray-200 bg-white text-gray-400 rounded-md inline-flex items-center justify-center cursor-not-allowed"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    
-                    {/* Delete Button */}
-                    <button 
-                      className="h-8 px-3 text-xs border border-red-200 bg-white hover:bg-red-50 text-red-600 rounded-md inline-flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={deleteLoading === wish.id}
-                      onClick={() => handleDeleteWish(wish.id)}
-                    >
-                      {deleteLoading === wish.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
+                    {/* Details Grid */}
+                    <div className="space-y-4 mb-6">
+                      {/* Price */}
+                      <div className="flex items-center gap-3 text-sm bg-green-50 rounded-lg p-3 transition-all hover:bg-green-100">
+                        <div className="relative">
+                          <DollarSign className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <div className="absolute inset-0 bg-green-600 rounded-full blur-sm opacity-20"></div>
+                        </div>
+                        <span className="text-gray-800 font-semibold">
+                          Budget: <span className="text-green-700 font-bold">{formatPrice(wish.basePrice || wish.price)}</span>
+                        </span>
+                      </div>
+                      
+                      {/* Category */}
+                      {wish.category && (
+                        <div className="flex items-center gap-3 text-sm bg-blue-50 rounded-lg p-3 transition-all hover:bg-blue-100">
+                          <Package className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                          <span className="text-gray-800">
+                            <span className="font-semibold">Category:</span> <span className="text-blue-700 font-medium">{wish.category}</span>
+                          </span>
+                        </div>
                       )}
-                    </button>
+                      
+                      {/* City */}
+                      {wish.city && (
+                        <div className="flex items-center gap-3 text-sm bg-red-50 rounded-lg p-3 transition-all hover:bg-red-100">
+                          <MapPin className="w-5 h-5 text-red-600 flex-shrink-0" />
+                          <span className="text-gray-800">
+                            <span className="font-semibold">City:</span> <span className="text-red-700 font-medium">{wish.city}</span>
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Deadline */}
+                      <div className="flex items-center gap-3 text-sm bg-purple-50 rounded-lg p-3 transition-all hover:bg-purple-100">
+                        <Calendar className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                        <span className="text-gray-800">
+                          <span className="font-semibold">Deadline:</span> <span className="text-purple-700 font-medium">{formatDate(wish.deliveryDeadline)}</span>
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-4 border-t border-gray-200">
+                      {/* View Bids Button */}
+                      <button className="flex-1 h-10 px-4 text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg inline-flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">
+                        <Eye className="w-4 h-4" />
+                        View Bids
+                      </button>
+                      
+                      {/* Edit Button */}
+                      <button 
+                        disabled
+                        className="h-10 px-4 text-sm font-medium bg-gray-100 text-gray-400 rounded-lg inline-flex items-center justify-center cursor-not-allowed opacity-60"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      
+                      {/* Delete Button */}
+                      <button 
+                        className="h-10 px-4 text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg inline-flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        disabled={deleteLoading === wish.id}
+                        onClick={() => handleDeleteWish(wish.id)}
+                      >
+                        {deleteLoading === wish.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
