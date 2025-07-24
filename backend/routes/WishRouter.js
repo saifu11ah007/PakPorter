@@ -18,5 +18,5 @@ router.get('/', getWishes); // Get all wishes
 router.get('/:id', getWishById); // Get a single wish by ID
 router.put('/:id', authMiddleware, updateWish); // Update a wish (authMiddlewareed)
 router.delete('/:id', authMiddleware, deleteWish); // Delete a wish (authMiddlewareed)
-router.get('/my-wishes',  wishMiddleware, getMyWishes); // Get authenticated user's wishes
+router.get('/mywishes',  wishMiddleware, getMyWishes); // Get authenticated user's wishes
 export default router;
