@@ -1,7 +1,7 @@
 
 import Product from '../models/Product.js';
 import asyncHandler from 'express-async-handler';
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'; // Add for ObjectId validation
 
 // @desc    Create a new wish
 // @route   POST /wish
