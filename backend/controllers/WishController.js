@@ -115,5 +115,4 @@ const getMyWishes = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
   res.json(wishes);
 });
-
 export { createWish, getWishes, getWishById, updateWish, deleteWish, getMyWishes };
