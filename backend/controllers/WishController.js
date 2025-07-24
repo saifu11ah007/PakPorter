@@ -1,12 +1,14 @@
-
 import Product from '../models/Product.js';
 import asyncHandler from 'express-async-handler';
-import mongoose from 'mongoose'; // Add for ObjectId validation
+import mongoose from 'mongoose';
 
 // @desc    Create a new wish
 // @route   POST /wish
 // @access  Private
 const createWish = asyncHandler(async (req, res) => {
+  console.log('createWish: Request body:', req.body); // Debug
+  console.log('createWish: User:', req.user); // Debug
+
   const { title, description, basePrice, deliveryDeadline, productLink, images, location } = req.body;
 
   if (!title || !description || !basePrice || !deliveryDeadline || !location?.country || !location?.city) {
@@ -14,18 +16,28 @@ const createWish = asyncHandler(async (req, res) => {
     throw new Error('Please provide all required fields');
   }
 
-  const wish = await Product.create({
-    title,
-    description,
-    basePrice,
-    deliveryDeadline,
-    productLink,
-    images,
-    location,
-    createdBy: req.user._id,
-  });
+  if (!req.user || !req.user._id) {
+    res.status(401);
+    throw new Error('User not authenticated');
+  }
 
-  res.status(201).json(wish);
+  try {
+    const wish = await Product.create({
+      title,
+      description,
+      basePrice,
+      deliveryDeadline,
+      productLink,
+      images,
+      location,
+      createdBy: req.user._id,
+    });
+    console.log('createWish: Wish created:', wish); // Debug
+    res.status(201).json(wish);
+  } catch (error) {
+    console.error('createWish: Error creating wish:', error); // Debug
+    throw error; // Let asyncHandler handle the error
+  }
 });
 
 // @desc    Get all wishes
