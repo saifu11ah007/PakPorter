@@ -2,11 +2,17 @@ import multer from 'multer';
 import { put } from '@vercel/blob';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import fs from 'fs';
 
-// Configure multer with disk storage for temporary files
+// Ensure the /tmp/uploads/ directory exists
+const uploadDir = '/tmp/uploads/';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '/tmp/uploads/'); // Use /tmp for Vercel serverless environment
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
@@ -31,7 +37,6 @@ const upload = multer({
   }
 });
 
-// Middleware to upload images to Vercel Blob Storage
 export const saveProductImagesToBlob = async (req, res, next) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -40,15 +45,17 @@ export const saveProductImagesToBlob = async (req, res, next) => {
 
     const imageUrls = [];
     for (const file of req.files) {
-      const { url } = await put(`product-wish/${uuidv4()}-${file.originalname}`, file.buffer, {
+      const fileBuffer = fs.readFileSync(file.path); // Read the file from disk
+      const { url } = await put(`product-wish/${uuidv4()}-${file.originalname}`, fileBuffer, {
         access: 'public',
         token: process.env.BLOB_READ_WRITE_TOKEN,
         addRandomSuffix: true
       });
       imageUrls.push(url);
+      // Clean up the temporary file
+      fs.unlinkSync(file.path);
     }
 
-    // Attach image URLs to request for further processing
     req.body.imageUrls = imageUrls;
     next();
   } catch (error) {

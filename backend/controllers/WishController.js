@@ -6,7 +6,9 @@ import mongoose from 'mongoose';
 // @route   POST /wish
 // @access  Private
 const createWish = asyncHandler(async (req, res) => {
-  const { title, description, basePrice, deliveryDeadline, productLink, images, location } = req.body;
+  const { title, description, basePrice, deliveryDeadline, productLink } = req.body;
+  const location = JSON.parse(req.body['location'] || '{}'); // Parse location from FormData
+  const images = req.body.imageUrls || []; // Get image URLs from middleware
 
   // Validate required fields
   if (!title || !description || !basePrice || !deliveryDeadline || !location?.country || !location?.city) {
@@ -14,19 +16,30 @@ const createWish = asyncHandler(async (req, res) => {
     throw new Error('Please provide all required fields');
   }
 
+  // Validate delivery deadline
+  const deadlineDate = new Date(deliveryDeadline);
+  const today = new Date();
+  if (deadlineDate <= today) {
+    res.status(400);
+    throw new Error('Delivery deadline must be in the future');
+  }
+
   // Create new wish
   const wish = await Product.create({
     title,
     description,
-    basePrice,
-    deliveryDeadline,
-    productLink,
+    basePrice: parseFloat(basePrice),
+    deliveryDeadline: deadlineDate,
+    productLink: productLink || undefined,
     images,
     location,
     createdBy: req.user._id,
+    isFulfilled: false,
+    acceptedBid: null,
+    createdAt: new Date()
   });
 
-  res.status(201).json(wish);
+  res.status(201).json({ message: 'Wish posted successfully', wish });
 });
 
 // @desc    Get all wishes
@@ -43,7 +56,6 @@ const getWishes = asyncHandler(async (req, res) => {
 // @route   GET /wish/:id
 // @access  Public
 const getWishById = asyncHandler(async (req, res) => {
-  // Validate ObjectId
   if (!mongoose.isValidObjectId(req.params.id)) {
     res.status(400);
     throw new Error('Invalid wish ID');
@@ -64,7 +76,6 @@ const getWishById = asyncHandler(async (req, res) => {
 // @route   PUT /wish/:id
 // @access  Private
 const updateWish = asyncHandler(async (req, res) => {
-  // Validate ObjectId
   if (!mongoose.isValidObjectId(req.params.id)) {
     res.status(400);
     throw new Error('Invalid wish ID');
@@ -77,13 +88,11 @@ const updateWish = asyncHandler(async (req, res) => {
     throw new Error('Wish not found');
   }
 
-  // Check if user is the creator
   if (wish.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to update this wish');
   }
 
-  // Update fields
   const { title, description, basePrice, deliveryDeadline, productLink, images, location } = req.body;
   wish.title = title || wish.title;
   wish.description = description || wish.description;
@@ -101,7 +110,6 @@ const updateWish = asyncHandler(async (req, res) => {
 // @route   DELETE /wish/:id
 // @access  Private
 const deleteWish = asyncHandler(async (req, res) => {
-  // Validate ObjectId
   if (!mongoose.isValidObjectId(req.params.id)) {
     res.status(400);
     throw new Error('Invalid wish ID');
@@ -114,7 +122,6 @@ const deleteWish = asyncHandler(async (req, res) => {
     throw new Error('Wish not found');
   }
 
-  // Check if user is the creator
   if (wish.createdBy.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to delete this wish');
