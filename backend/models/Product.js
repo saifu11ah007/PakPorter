@@ -40,15 +40,16 @@ const productSchema = new mongoose.Schema({
     }
   },
   images: [{
-    type: String,
-    validate: {
-      validator: function (v) {
-        if (!v) return true;
-        return /^https?:\/\/[\w\.-]+(\.[\w\.-]+)+[\w\-\._~:/?#[\]@!$&'()*+,;=.]+$/.test(v);
-      },
-      message: 'Invalid image URL'
-    }
-  }],
+  type: String,
+  validate: {
+    validator: function (v) {
+      if (!v) return true;
+      // More permissive regex for blob storage URLs
+      return /^https?:\/\/.+/.test(v);
+    },
+    message: 'Invalid image URL'
+  }
+}],
   location: {
     country: { type: String, required: true, trim: true, lowercase: true },
     city: { type: String, required: true, trim: true, lowercase: true }
