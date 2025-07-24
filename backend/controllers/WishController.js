@@ -105,5 +105,10 @@ const deleteWish = asyncHandler(async (req, res) => {
   await Product.deleteOne({ _id: req.params.id });
   res.json({ message: 'Wish deleted successfully' });
 });
-
-export { createWish, getWishes, getWishById, updateWish, deleteWish };
+const getMyWishes = asyncHandler(async (req, res) => {
+  const wishes = await Product.find({ createdBy: req.user._id })
+    .populate('createdBy', 'username')
+    .sort({ createdAt: -1 });
+  res.json(wishes);
+});
+export { createWish, getWishes, getWishById, updateWish, deleteWish, getMyWishes };

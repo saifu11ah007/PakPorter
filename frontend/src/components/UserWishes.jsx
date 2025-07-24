@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const UserWishes = () => {
@@ -11,10 +12,10 @@ const UserWishes = () => {
     const fetchWishes = async () => {
       try {
         setLoading(true);
-        // Assuming the API endpoint filters wishes by the logged-in user
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/wish`, {
+        // Use the new my-wishes endpoint
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/wish/my-wishes`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`, // Assuming JWT token is stored in localStorage
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
         setWishes(response.data);
@@ -32,7 +33,7 @@ const UserWishes = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this wish?')) {
       try {
-        await axios.delete(`/api/wish/${id}`, {
+        await axios.delete(`${process.env.REACT_APP_API_URL}/wish/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
