@@ -37,9 +37,9 @@ const PakPorterHomepage = () => {
               </span>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Services</a>
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Tracking</a>
-              <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">About</a>
+              <a href="/my-wishes" className="text-gray-700 hover:text-blue-600 transition-colors">My Wishes</a>
+              <a href="/wishes" className="text-gray-700 hover:text-blue-600 transition-colors">Wishes</a>
+              <a href="/product/wish/post" className="text-gray-700 hover:text-blue-600 transition-colors">Post a Wish</a>
               <a href="/" className="text-gray-700 hover:text-blue-600 transition-colors">Contact</a>
             </nav>
             {isLoggedIn ? (
@@ -107,12 +107,21 @@ const PakPorterHomepage = () => {
 
               {/* CTA Button */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button
+                
+                {isLoggedIn ? (
+              <button href="/product/wish/post"
+                  className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-green-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  POST A WISH
+                </button>
+            ) : (
+              <button
                   onClick={handleSignUp}
                   className="bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-green-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   Sign Up Now
                 </button>
+            )}
                 <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-blue-600 hover:text-blue-600 transition-colors">
                   Learn More
                 </button>
