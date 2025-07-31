@@ -5,7 +5,7 @@ import express from 'express';
        import AuthRouter from '../routes/AuthRouter.js';
        import serverless from 'serverless-http';
 import WishRouter from '../routes/WishRouter.js';
-import Bid from '../models/BId.js';
+import Bid from '../models/Bid.js';
 import BidRouter from '../routes/BidRouter.js';
        dotenv.config();
        const app = express();
