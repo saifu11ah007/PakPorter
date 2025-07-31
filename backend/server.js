@@ -6,6 +6,7 @@ import bodyParser  from 'body-parser';
 import AuthRouter from './routes/AuthRouter.js';
 import sendEmailOTP from './config/OTP.js';
 import WishRouter from './routes/WishRouter.js';
+import BidRouter from './routes/BidRouter.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,5 +29,5 @@ async function startServer() {
 }
 app.use('/auth',AuthRouter);
 app.use('/wish',WishRouter);
-
+app.use('/bids', BidRouter);
 startServer();

@@ -5,7 +5,8 @@ import express from 'express';
        import AuthRouter from '../routes/AuthRouter.js';
        import serverless from 'serverless-http';
 import WishRouter from '../routes/WishRouter.js';
-import Bid from '../models/BId.js';
+import BidRouter from '../routes/BidRouter.js';
+
        dotenv.config();
        const app = express();
 
@@ -20,6 +21,7 @@ import Bid from '../models/BId.js';
 
        app.use('/auth', AuthRouter);
       app.use('/wish',WishRouter);
+      app.use('/bids', BidRouter);
        async function startServer() {
          try {
            await connectDB();
