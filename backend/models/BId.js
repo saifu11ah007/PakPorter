@@ -33,5 +33,5 @@ const bidSchema = new mongoose.Schema({
     default: Date.now,
   }
 });
-
+//fixing name
 export default mongoose.model('Bid', bidSchema);

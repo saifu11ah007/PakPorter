@@ -1,5 +1,5 @@
 import asyncHandler from 'express-async-handler';
-import Bid from '../models/Bid.js';
+import Bid from '../models/BId.js';
 import Product from '../models/Product.js';
 import mongoose from 'mongoose';
 
