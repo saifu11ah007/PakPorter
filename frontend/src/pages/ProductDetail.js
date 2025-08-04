@@ -22,10 +22,14 @@ import {
   ExternalLink
 } from 'lucide-react';
 
-// Get wish ID from URL (you would use React Router params in real app)
 const getWishIdFromUrl = () => {
-  // Mock for demo - in real app, use useParams() from react-router-dom
-  return '1';
+  // Extract ID from current URL path
+  const pathParts = window.location.pathname.split('/');
+  const wishIndex = pathParts.indexOf('wish');
+  if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
+    return pathParts[wishIndex + 1];
+  }
+  return null;
 };
 
 // Check authentication
