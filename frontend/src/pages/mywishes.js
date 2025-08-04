@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  
-  Eye, 
-  Calendar, 
-  MapPin, 
-  DollarSign, 
+import {
+
+  Eye,
+  Calendar,
+  MapPin,
+  DollarSign,
   Package,
   Plus,
   Loader2,
@@ -20,7 +20,7 @@ const MyWishesPage = () => {
 
   // Check if user is logged in
   const token = localStorage?.getItem('token');
-  
+
   const fetchMyWishes = useCallback(async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
@@ -43,7 +43,7 @@ const MyWishesPage = () => {
       setLoading(false);
     }
   }, [token]);
-  
+
   useEffect(() => {
     if (!token) {
       setError('Please log in to view your wishes');
@@ -53,7 +53,7 @@ const MyWishesPage = () => {
     fetchMyWishes();
   }, [token, fetchMyWishes]);
 
- 
+
   const getStatusBadgeColor = (isFulfilled) => {
     if (isFulfilled) {
       return 'bg-green-50 text-green-700 border-green-200';
@@ -118,7 +118,7 @@ const MyWishesPage = () => {
         <div className="absolute top-1/3 -right-8 w-64 h-64 bg-gradient-to-br from-cyan-400/10 to-teal-600/10 rounded-full blur-3xl animate-pulse delay-700"></div>
         <div className="absolute -bottom-8 -left-8 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-blue-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
-      
+
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="mb-10">
@@ -142,7 +142,7 @@ const MyWishesPage = () => {
               <span className="font-semibold">Post New Wish</span>
             </button>
           </div>
-          
+
           {wishes.length > 0 && (
             <div className="mt-8">
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 p-6 shadow-xl">
@@ -193,7 +193,7 @@ const MyWishesPage = () => {
               <div key={wish.id} className="group relative">
                 {/* Card glow effect */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-0 group-hover:opacity-20 transition-all duration-500"></div>
-                
+
                 <div className="relative bg-white/70 backdrop-blur-sm border border-white/30 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden">
                   {/* Card Header with gradient */}
                   <div className="p-6 pb-4 relative">
@@ -211,14 +211,14 @@ const MyWishesPage = () => {
                       {index + 1}
                     </div>
                   </div>
-                  
+
                   {/* Card Content */}
                   <div className="p-6 pt-2">
                     {/* Product Image */}
                     {wish.images && wish.images.length > 0 && (
                       <div className="mb-4 rounded-xl overflow-hidden shadow-lg">
-                        <img 
-                          src={wish.images[0]} 
+                        <img
+                          src={wish.images[0]}
                           alt={wish.title}
                           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                           onError={(e) => {
@@ -236,7 +236,7 @@ const MyWishesPage = () => {
                         </p>
                       </div>
                     )}
-                    
+
                     {/* Details Grid */}
                     <div className="space-y-4 mb-6">
                       {/* Price */}
@@ -249,25 +249,25 @@ const MyWishesPage = () => {
                           Budget: <span className="text-green-700 font-bold">{formatPrice(wish.basePrice)}</span>
                         </span>
                       </div>
-                      
+
                       {/* Location */}
                       {wish.location && (
                         <div className="flex items-center gap-3 text-sm bg-red-50 rounded-lg p-3 transition-all hover:bg-red-100">
                           <MapPin className="w-5 h-5 text-red-600 flex-shrink-0" />
                           <span className="text-gray-800">
-                            <span className="font-semibold">Location:</span> 
+                            <span className="font-semibold">Location:</span>
                             <span className="text-red-700 font-medium">
                               {wish.location.city}, {wish.location.country}
                             </span>
                           </span>
                         </div>
                       )}
-                      
+
                       {/* Deadline */}
                       <div className="flex items-center gap-3 text-sm bg-purple-50 rounded-lg p-3 transition-all hover:bg-purple-100">
                         <Calendar className="w-5 h-5 text-purple-600 flex-shrink-0" />
                         <span className="text-gray-800">
-                          <span className="font-semibold">Deadline:</span> 
+                          <span className="font-semibold">Deadline:</span>
                           <span className="text-purple-700 font-medium">{formatDate(wish.deliveryDeadline)}</span>
                         </span>
                       </div>
@@ -277,10 +277,10 @@ const MyWishesPage = () => {
                         <div className="flex items-center gap-3 text-sm bg-blue-50 rounded-lg p-3 transition-all hover:bg-blue-100">
                           <Package className="w-5 h-5 text-blue-600 flex-shrink-0" />
                           <span className="text-gray-800">
-                            <span className="font-semibold">Reference:</span> 
-                            <a 
-                              href={wish.productLink} 
-                              target="_blank" 
+                            <span className="font-semibold">Reference:</span>
+                            <a
+                              href={wish.productLink}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-700 font-medium hover:underline ml-1"
                             >
@@ -290,10 +290,13 @@ const MyWishesPage = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Action Button */}
                     <div className="pt-4 border-t border-gray-200">
-                      <button className="w-full h-12 px-6 text-sm font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl inline-flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                      <button
+                        onClick={() => window.location.href = `/wish/${wish._id}`}
+                        className="w-full h-12 px-6 text-sm font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-xl inline-flex items-center justify-center gap-3 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      >
                         <Eye className="w-5 h-5" />
                         <span>View Product Details</span>
                         <Star className="w-4 h-4 fill-current" />
