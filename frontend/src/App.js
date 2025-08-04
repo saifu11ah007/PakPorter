@@ -36,7 +36,7 @@ function App() {
         <Route path="/" element={<PakPorterHomepage />} />
         <Route path="/product/wish/post" element={<PostWish />} />
         <Route path="/wishes" element={<MyWishesPage />} />
-        <Route path="/wishes/:id" element={<WishDetailPage />} />
+        <Route path="/wish/:id" element={<WishDetailPage />} />
         <Route path="/my-wishes" element={<UserWishes />} />
         <Route
           path="/login"
