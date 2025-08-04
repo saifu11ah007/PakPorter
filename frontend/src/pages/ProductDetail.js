@@ -413,7 +413,7 @@ const WishDetailPage = () => {
 
               <div className="flex items-center gap-3 text-gray-700">
                 <User className="w-5 h-5 text-gray-400" />
-                <span>Posted by {wish.createdBy.username}</span>
+                <span>Posted by {wish.createdBy.fullName}</span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-700">
