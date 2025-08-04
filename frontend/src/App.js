@@ -12,6 +12,7 @@ import UserProfile from './pages/UserProfile.js';
 import PostWish from './pages/ProductWish.js';
 import MyWishesPage from './pages/mywishes.js';
 import UserWishes from './components/UserWishes.jsx';
+import WishDetailPage from './pages/ProductDetail.js';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" element={<PakPorterHomepage />} />
         <Route path="/product/wish/post" element={<PostWish />} />
         <Route path="/wishes" element={<MyWishesPage />} />
+        <Route path="/wishes/:id" element={<WishDetailPage />} />
         <Route path="/my-wishes" element={<UserWishes />} />
         <Route
           path="/login"
