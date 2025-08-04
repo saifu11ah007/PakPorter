@@ -13,6 +13,7 @@ const PostWish = () => {
   });
   
   const [selectedImages, setSelectedImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]); // Store actual File objects
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,10 +48,12 @@ const PostWish = () => {
     
     const imageUrls = files.map(file => URL.createObjectURL(file));
     setSelectedImages(imageUrls);
+    setImageFiles(files); // Store the File objects
   };
 
   const removeImage = (index) => {
     setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const validateForm = () => {
@@ -107,10 +110,9 @@ const PostWish = () => {
       formDataToSend.append('location[city]', formData.city);
 
       // Append images to FormData
-      const imageInputs = document.querySelector('input[type="file"]').files;
-      for (const file of imageInputs) {
+      imageFiles.forEach(file => {
         formDataToSend.append('images', file);
-      }
+      });
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
         method: 'POST',
@@ -120,8 +122,10 @@ const PostWish = () => {
         body: formDataToSend
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to post wish');
+        throw new Error(responseData.message || 'Failed to post wish');
       }
 
       setMessage({ type: 'success', text: 'Your wish has been posted successfully!' });
@@ -137,12 +141,14 @@ const PostWish = () => {
         country: 'Pakistan'
       });
       setSelectedImages([]);
+      setImageFiles([]);
 
       setTimeout(() => {
         window.location.href = '/my-wishes';
       }, 2000);
 
     } catch (error) {
+      console.error('Error posting wish:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to post wish. Please try again.' });
     } finally {
       setLoading(false);
@@ -153,7 +159,7 @@ const PostWish = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8 text-center">
-          <AlertCircle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+          <AlertCircle className="w-16 h-16 text-orange-500 mr-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Authentication Required</h2>
           <p className="text-gray-600">Please log in to post a wish.</p>
         </div>
