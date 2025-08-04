@@ -69,7 +69,7 @@ const createWish = asyncHandler(async (req, res) => {
 // @access  Public
 const getWishes = asyncHandler(async (req, res) => {
   const wishes = await Product.find({})
-    .populate('createdBy', 'username')
+    .populate('createdBy', 'fullName')
     .sort({ createdAt: -1 });
   res.json(wishes);
 });
@@ -84,7 +84,7 @@ const getWishById = asyncHandler(async (req, res) => {
   }
 
   const wish = await Product.findById(req.params.id)
-    .populate('createdBy', 'username');
+    .populate('createdBy', 'fullName');
 
   if (!wish) {
     res.status(404);
@@ -163,7 +163,7 @@ const getMyWishes = asyncHandler(async (req, res) => {
   }
 
   const wishes = await Product.find({ createdBy: req.user._id })
-    .populate('createdBy', 'username')
+    .populate('createdBy', 'fullName')
     .sort({ createdAt: -1 });
 
   res.json(wishes);
