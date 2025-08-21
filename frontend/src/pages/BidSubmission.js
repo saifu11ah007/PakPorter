@@ -19,9 +19,17 @@ const useAuth = () => {
 
   return { user, isAuthenticated, loading };
 };
+const getWishIdFromUrl = () => {
+  const pathParts = window.location.pathname.split('/');
+  const wishIndex = pathParts.indexOf('wish');
+  if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
+    return pathParts[wishIndex + 1];
+  }
+    return null;
+  };
 
 const BidForm = ({ wishOwnerId }) => {
-  const { wishId } = useParams();
+  const { wishId } = getWishIdFromUrl()
   const navigate = useNavigate();
   const { user, isAuthenticated, loading } = useAuth();
   const [bidAmount, setBidAmount] = useState('');
