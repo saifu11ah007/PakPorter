@@ -232,7 +232,7 @@ const WishDetailPage = () => {
       return;
     }
     console.log('Navigating to bid form with wishId:', wish._id);
-    navigate(`/wish/${wish._id}/bid`);
+    navigate(`/bid/${wish._id}`);
   };
 
   if (authLoading || loading) {

@@ -38,7 +38,7 @@ function App() {
         <Route path="/product/wish/post" element={<PostWish />} />
         <Route path="/wishes" element={<MyWishesPage />} />
         <Route path="/wish/:id" element={<WishDetailPage />} />
-        <Route path="/wish/:id/bid" element={<BidForm />} />
+        <Route path="/bid/:id" element={<BidForm />} />
         <Route path="/my-wishes" element={<UserWishes />} />
         <Route
           path="/login"
