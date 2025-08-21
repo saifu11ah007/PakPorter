@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,16 +20,18 @@ const useAuth = () => {
 
   return { user, isAuthenticated, loading };
 };
+
 const getWishIdFromUrl = () => {
   const pathParts = window.location.pathname.split('/');
-  const wishIndex = pathParts.indexOf('bid');
-  if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
-    return pathParts[wishIndex + 1];
+  const bidIndex = pathParts.indexOf('bid');
+  if (bidIndex !== -1 && pathParts[bidIndex + 1]) {
+    return pathParts[bidIndex + 1];
   }
   return null;
 };
+
 const BidForm = () => {
-  const { wishId } = getWishIdFromUrl();
+  const wishId = getWishIdFromUrl();
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [wishOwnerId, setWishOwnerId] = useState(null);
@@ -42,7 +45,7 @@ const BidForm = () => {
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
-    console.log('wishId from useParams:', wishId); // Debug wishId
+    console.log('wishId from getWishIdFromUrl:', wishId); // Debug wishId
     if (!wishId) {
       setFetchError('Invalid wish ID');
       return;
@@ -69,6 +72,7 @@ const BidForm = () => {
         console.log('Wish data in BidForm:', wishData); // Debug wish data
         setWishOwnerId(wishData.createdBy._id);
       } catch (err) {
+        console.error('Fetch error:', err.message);
         setFetchError(err.message);
       } finally {
         setIsLoading(false);
@@ -141,6 +145,7 @@ const BidForm = () => {
         navigate(`/wish/${wishId}`);
       }, 3000);
     } catch (error) {
+      console.error('Submit error:', error.message);
       setAlert({ type: 'error', message: error.message });
       setTimeout(() => setAlert(null), 3000);
     } finally {
