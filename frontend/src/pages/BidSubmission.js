@@ -182,6 +182,11 @@ const BidForm = () => {
           setAlert({ type: 'error', message: 'Your session has expired. Please log in again.' });
           setTimeout(() => { setAlert(null); navigate('/login'); }, 2000);
           return;
+        } else if (response.status === 403) {
+          console.log('handleSubmit: Forbidden, user not allowed to bid');
+          setAlert({ type: 'error', message: errorData.message || 'You are not allowed to bid on this wish.' });
+          setTimeout(() => setAlert(null), 3000);
+          return;
         }
         throw new Error(errorData.message || 'Failed to place bid');
       }
