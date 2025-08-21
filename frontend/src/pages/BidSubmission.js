@@ -9,13 +9,24 @@ const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    console.log('useAuth: authToken from localStorage:', token); // Debug token
+    const token = localStorage.getItem('authToken');
+    console.log('useAuth: authToken from localStorage:', token ? 'Present' : 'Missing'); // Debug token presence
     if (token) {
-      const userData = { id: 'current-user-id', name: 'Current User', token };
-      console.log('useAuth: Setting user:', userData); // Debug user data
-      setUser(userData);
-      setIsAuthenticated(true);
+      try {
+        // Verify token format (basic JWT check)
+        if (token.split('.').length === 3) {
+          const userData = { id: 'current-user-id', name: 'Current User', token };
+          console.log('useAuth: Setting user:', userData); // Debug user data
+          setUser(userData);
+          setIsAuthenticated(true);
+        } else {
+          console.log('useAuth: Invalid token format, clearing authToken');
+          localStorage.removeItem('authToken');
+        }
+      } catch (err) {
+        console.error('useAuth: Token parsing error:', err.message);
+        localStorage.removeItem('authToken');
+      }
     } else {
       console.log('useAuth: No token found in localStorage');
     }
@@ -60,18 +71,20 @@ const BidForm = () => {
       try {
         setIsLoading(true);
         console.log('fetchWishDetails: Fetching wish with URL:', `${process.env.REACT_APP_API_URL}/wish/${wishId}`); // Debug URL
-        console.log('fetchWishDetails: Using token:', user?.token); // Debug token
+        console.log('fetchWishDetails: Using token:', user?.token ? 'Present' : 'Missing'); // Debug token
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
-          headers: {
-            Authorization: `Bearer ${user?.token}`,
-          },
+          headers: user?.token ? { Authorization: `Bearer ${user?.token}` } : {},
         });
         if (!response.ok) {
           const errorData = await response.json();
           if (response.status === 404) {
             throw new Error('Wish not found');
           } else if (response.status === 401) {
-            throw new Error('Please log in to view this wish');
+            console.log('fetchWishDetails: Unauthorized, clearing authToken');
+            localStorage.removeItem('authToken');
+            setFetchError('Your session has expired. Please log in again.');
+            setTimeout(() => navigate('/login'), 2000);
+            return;
           } else {
             throw new Error(errorData.message || 'Failed to fetch wish details');
           }
@@ -89,12 +102,13 @@ const BidForm = () => {
 
     if (wishId && user?.token) {
       fetchWishDetails();
-    } else if (!user?.token) {
-      console.log('BidForm: No user token, setting fetchError');
+    } else {
+      console.log('BidForm: No user token, redirecting to login');
       setFetchError('Please log in to place a bid');
+      setTimeout(() => navigate('/login'), 2000);
       setIsLoading(false);
     }
-  }, [wishId, user, isAuthenticated, authLoading]); // Added isAuthenticated, authLoading
+  }, [wishId, user, isAuthenticated, authLoading, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -125,6 +139,11 @@ const BidForm = () => {
       setTimeout(() => setAlert(null), 3000);
       return;
     }
+    if (!user?.token) {
+      setAlert({ type: 'error', message: 'Please log in to place a bid' });
+      setTimeout(() => { setAlert(null); navigate('/login'); }, 2000);
+      return;
+    }
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -150,6 +169,13 @@ const BidForm = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 401) {
+          console.log('handleSubmit: Unauthorized, clearing authToken');
+          localStorage.removeItem('authToken');
+          setAlert({ type: 'error', message: 'Your session has expired. Please log in again.' });
+          setTimeout(() => { setAlert(null); navigate('/login'); }, 2000);
+          return;
+        }
         throw new Error(errorData.message || 'Failed to place bid');
       }
 
@@ -187,13 +213,13 @@ const BidForm = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
           <p className="text-gray-600 mb-6">{fetchError}</p>
           <button
-            onClick={() => window.location.href = '/login'}
+            onClick={() => navigate('/login')}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors mb-2"
           >
             Go to Login
           </button>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
             className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Go Back
