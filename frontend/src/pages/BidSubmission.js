@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,9 +10,14 @@ const useAuth = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
+    console.log('useAuth: authToken from localStorage:', token); // Debug token
     if (token) {
-      setUser({ id: 'current-user-id', name: 'Current User', token });
+      const userData = { id: 'current-user-id', name: 'Current User', token };
+      console.log('useAuth: Setting user:', userData); // Debug user data
+      setUser(userData);
       setIsAuthenticated(true);
+    } else {
+      console.log('useAuth: No token found in localStorage');
     }
     setLoading(false);
   }, []);
@@ -45,7 +49,8 @@ const BidForm = () => {
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
-    console.log('wishId from getWishIdFromUrl:', wishId); // Debug wishId
+    console.log('BidForm: wishId from getWishIdFromUrl:', wishId); // Debug wishId
+    console.log('BidForm: user:', user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading); // Debug auth
     if (!wishId) {
       setFetchError('Invalid wish ID');
       return;
@@ -54,25 +59,28 @@ const BidForm = () => {
     const fetchWishDetails = async () => {
       try {
         setIsLoading(true);
+        console.log('fetchWishDetails: Fetching wish with URL:', `${process.env.REACT_APP_API_URL}/wish/${wishId}`); // Debug URL
+        console.log('fetchWishDetails: Using token:', user?.token); // Debug token
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
           headers: {
             Authorization: `Bearer ${user?.token}`,
           },
         });
         if (!response.ok) {
+          const errorData = await response.json();
           if (response.status === 404) {
             throw new Error('Wish not found');
           } else if (response.status === 401) {
             throw new Error('Please log in to view this wish');
           } else {
-            throw new Error('Failed to fetch wish details');
+            throw new Error(errorData.message || 'Failed to fetch wish details');
           }
         }
         const wishData = await response.json();
-        console.log('Wish data in BidForm:', wishData); // Debug wish data
+        console.log('fetchWishDetails: Wish data:', wishData); // Debug wish data
         setWishOwnerId(wishData.createdBy._id);
       } catch (err) {
-        console.error('Fetch error:', err.message);
+        console.error('fetchWishDetails: Error:', err.message); // Debug error
         setFetchError(err.message);
       } finally {
         setIsLoading(false);
@@ -82,6 +90,7 @@ const BidForm = () => {
     if (wishId && user?.token) {
       fetchWishDetails();
     } else if (!user?.token) {
+      console.log('BidForm: No user token, setting fetchError');
       setFetchError('Please log in to place a bid');
       setIsLoading(false);
     }
@@ -120,6 +129,12 @@ const BidForm = () => {
 
     setIsLoading(true);
     try {
+      console.log('handleSubmit: Submitting bid to:', `${process.env.REACT_APP_API_URL}/bids/${wishId}`); // Debug submission
+      console.log('handleSubmit: Payload:', {
+        offerPrice: parseFloat(bidAmount),
+        message,
+        deliveryDate: new Date(deliveryDate).toISOString(),
+      }); // Debug payload
       const response = await fetch(`${process.env.REACT_APP_API_URL}/bids/${wishId}`, {
         method: 'POST',
         headers: {
@@ -145,7 +160,7 @@ const BidForm = () => {
         navigate(`/wish/${wishId}`);
       }, 3000);
     } catch (error) {
-      console.error('Submit error:', error.message);
+      console.error('handleSubmit: Error:', error.message); // Debug error
       setAlert({ type: 'error', message: error.message });
       setTimeout(() => setAlert(null), 3000);
     } finally {
@@ -172,8 +187,14 @@ const BidForm = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
           <p className="text-gray-600 mb-6">{fetchError}</p>
           <button
+            onClick={() => window.location.href = '/login'}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors mb-2"
+          >
+            Go to Login
+          </button>
+          <button
             onClick={() => window.history.back()}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Go Back
           </button>
