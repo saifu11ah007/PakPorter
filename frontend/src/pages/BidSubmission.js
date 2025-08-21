@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -8,7 +8,7 @@ const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       setUser({ id: 'current-user-id', name: 'Current User', token });
@@ -19,19 +19,12 @@ const useAuth = () => {
 
   return { user, isAuthenticated, loading };
 };
-const getWishIdFromUrl = () => {
-  const pathParts = window.location.pathname.split('/');
-  const wishIndex = pathParts.indexOf('wish');
-  if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
-    return pathParts[wishIndex + 1];
-  }
-    return null;
-  };
 
-const BidForm = ({ wishOwnerId }) => {
-  const { wishId } = getWishIdFromUrl()
+const BidForm = () => {
+  const { wishId } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const [wishOwnerId, setWishOwnerId] = useState(null);
   const [bidAmount, setBidAmount] = useState('');
   const [message, setMessage] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
@@ -39,8 +32,47 @@ const BidForm = ({ wishOwnerId }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
 
-  const isOwnWish = user?.id === wishOwnerId;
+  useEffect(() => {
+    if (!wishId) {
+      setFetchError('Invalid wish ID');
+      return;
+    }
+
+    const fetchWishDetails = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        });
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Wish not found');
+          } else if (response.status === 401) {
+            throw new Error('Please log in to view this wish');
+          } else {
+            throw new Error('Failed to fetch wish details');
+          }
+        }
+        const wishData = await response.json();
+        setWishOwnerId(wishData.createdBy._id);
+      } catch (err) {
+        setFetchError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (wishId && user?.token) {
+      fetchWishDetails();
+    } else if (!user?.token) {
+      setFetchError('Please log in to place a bid');
+      setIsLoading(false);
+    }
+  }, [wishId, user]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -66,6 +98,11 @@ const BidForm = ({ wishOwnerId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!wishId) {
+      setAlert({ type: 'error', message: 'Invalid wish ID' });
+      setTimeout(() => setAlert(null), 3000);
+      return;
+    }
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -102,7 +139,7 @@ const BidForm = ({ wishOwnerId }) => {
     }
   };
 
-  if (loading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -112,6 +149,26 @@ const BidForm = ({ wishOwnerId }) => {
       </div>
     );
   }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
+          <p className="text-gray-600 mb-6">{fetchError}</p>
+          <button
+            onClick={() => window.history.back()}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isOwnWish = isAuthenticated && user && wishOwnerId === user.id;
 
   return (
     <AnimatePresence>
