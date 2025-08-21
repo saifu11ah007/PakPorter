@@ -21,7 +21,7 @@ import {
   CheckCircle,
   ExternalLink
 } from 'lucide-react';
-import jwtDecode from 'jwt-decode'; // Requires: npm install jwt-decode
+import {jwtDecode} from 'jwt-decode'; // Requires: npm install jwt-decode
 
 const getWishIdFromUrl = () => {
   const pathParts = window.location.pathname.split('/');
@@ -39,10 +39,18 @@ const useAuth = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
+    console.log('useAuth: authToken from localStorage:', token ? 'Present' : 'Missing'); // Debug token
     if (token) {
-      const userData = { id: 'current-user-id', name: 'Current User', token };
-      setUser(userData);
-      setIsAuthenticated(true);
+      try {
+        const decoded = jwtDecode(token);
+        const userData = { id: decoded._id, name: decoded.name || 'Current User', token };
+        console.log('useAuth: Setting user:', userData); // Debug user data
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('useAuth: Token decode error:', err.message);
+        localStorage.removeItem('authToken');
+      }
     }
     setLoading(false);
   }, []);
@@ -157,7 +165,6 @@ const WishDetailPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
   const wishId = getWishIdFromUrl();
-  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchWishDetails = async () => {
@@ -168,20 +175,6 @@ const WishDetailPage = () => {
         console.log('Fetching wish with ID:', wishId); // Line 166
         const token = localStorage.getItem('authToken');
         console.log('fetchWishDetails: authToken:', token ? 'Present' : 'Missing'); // Debug token
-        if (token) {
-          try {
-            const decoded = jwtDecode(token);
-            console.log('fetchWishDetails: Decoded user ID:', decoded._id); // Debug user ID
-            setUserId(decoded._id);
-          } catch (err) {
-            console.error('fetchWishDetails: Token decode error:', err.message);
-            setError('Invalid authentication token');
-            localStorage.removeItem('authToken');
-            setTimeout(() => navigate('/login'), 2000);
-            setLoading(false);
-            return;
-          }
-        }
 
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
           headers: {
@@ -190,15 +183,17 @@ const WishDetailPage = () => {
         });
 
         if (!response.ok) {
+          const errorData = await response.json();
           if (response.status === 404) {
             throw new Error('Wish not found');
           } else if (response.status === 400) {
             throw new Error('Invalid wish ID');
           } else if (response.status === 401) {
+            console.log('fetchWishDetails: Unauthorized, clearing authToken');
             localStorage.removeItem('authToken');
             throw new Error('Please log in to view this wish');
           } else {
-            throw new Error('Failed to fetch wish details');
+            throw new Error(errorData.message || 'Failed to fetch wish details');
           }
         }
 
@@ -206,18 +201,18 @@ const WishDetailPage = () => {
         console.log('Wish data:', wishData); // Line 186
         setWish(wishData);
       } catch (err) {
-        console.error('Error fetching wish:', err);
+        console.error('fetchWishDetails: Error:', err.message);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (wishId && user?.token) {
+    if (wishId) {
       fetchWishDetails();
     } else {
       setLoading(false);
-      setError('Please log in to view this wish');
+      setError('Invalid wish ID');
     }
 
     const handleScroll = () => {
@@ -226,7 +221,7 @@ const WishDetailPage = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [wishId, user, navigate]);
+  }, [wishId, navigate]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -248,6 +243,11 @@ const WishDetailPage = () => {
 
   const handlePlaceBid = () => {
     console.log('handlePlaceBid: Navigating to bid form with wishId:', wish._id); // Line 234
+    if (!user?.token) {
+      console.log('handlePlaceBid: No token, redirecting to login');
+      navigate('/login');
+      return;
+    }
     navigate(`/bid/${wish._id}`);
   };
 
@@ -299,7 +299,7 @@ const WishDetailPage = () => {
     );
   }
 
-  const isOwner = userId && wish.createdBy._id === userId;
+  const isOwner = user && wish.createdBy && wish.createdBy._id === user.id;
   const daysLeft = Math.max(0, Math.ceil((new Date(wish.deliveryDeadline) - new Date()) / (1000 * 60 * 60 * 24)));
   const isExpired = new Date(wish.deliveryDeadline) < new Date();
 
@@ -467,7 +467,7 @@ const WishDetailPage = () => {
                     Please log in to place a bid on this wish.
                   </p>
                   <button
-                    onClick={() => window.location.href = '/login'}
+                    onClick={() => navigate('/login')}
                     className="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
                   >
                     Login to Bid
@@ -496,11 +496,17 @@ const WishDetailPage = () => {
               ) : (
                 <button
                   onClick={handlePlaceBid}
-                  disabled={isExpired || wish.isFulfilled || !wish._id}
+                  disabled={isExpired || wish.isFulfilled || !wish._id || isOwner}
                   className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   <DollarSign className="w-5 h-5" />
-                  {wish.isFulfilled ? 'Wish Fulfilled' : isExpired ? 'Bidding Closed' : 'Place Bid'}
+                  {isOwner
+                    ? 'Cannot Bid on Own Wish'
+                    : wish.isFulfilled
+                    ? 'Wish Fulfilled'
+                    : isExpired
+                    ? 'Bidding Closed'
+                    : 'Place Bid'}
                 </button>
               )}
             </div>
