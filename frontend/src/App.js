@@ -13,6 +13,7 @@ import PostWish from './pages/ProductWish.js';
 import MyWishesPage from './pages/mywishes.js';
 import UserWishes from './components/UserWishes.jsx';
 import WishDetailPage from './pages/ProductDetail.js';
+import BidForm from './pages/BidSubmission.js';
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
   const isLoggedIn = !!localStorage.getItem('authToken');
@@ -37,6 +38,7 @@ function App() {
         <Route path="/product/wish/post" element={<PostWish />} />
         <Route path="/wishes" element={<MyWishesPage />} />
         <Route path="/wish/:id" element={<WishDetailPage />} />
+        <Route path="/wish/:id/bid" element={<BidForm />} />
         <Route path="/my-wishes" element={<UserWishes />} />
         <Route
           path="/login"
