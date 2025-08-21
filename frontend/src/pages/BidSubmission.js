@@ -94,7 +94,7 @@ const BidForm = () => {
       setFetchError('Please log in to place a bid');
       setIsLoading(false);
     }
-  }, [wishId, user]);
+  }, [wishId, user, isAuthenticated, authLoading]); // Added isAuthenticated, authLoading
 
   const validateForm = () => {
     const newErrors = {};
