@@ -62,7 +62,7 @@ const BidForm = ({ wishOwnerId }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/bids/${wishId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/bids/${wishId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
