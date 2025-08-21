@@ -62,8 +62,15 @@ const BidForm = () => {
   useEffect(() => {
     console.log('BidForm: wishId from getWishIdFromUrl:', wishId); // Debug wishId
     console.log('BidForm: user:', user, 'isAuthenticated:', isAuthenticated, 'authLoading:', authLoading); // Debug auth
+
+    if (authLoading) {
+      console.log('BidForm: authLoading is true, waiting for auth to resolve');
+      return; // Wait for authLoading to resolve
+    }
+
     if (!wishId) {
       setFetchError('Invalid wish ID');
+      setIsLoading(false);
       return;
     }
 
@@ -102,7 +109,7 @@ const BidForm = () => {
 
     if (wishId && user?.token) {
       fetchWishDetails();
-    } else {
+    } else if (!authLoading && !user?.token) {
       console.log('BidForm: No user token, redirecting to login');
       setFetchError('Please log in to place a bid');
       setTimeout(() => navigate('/login'), 2000);
