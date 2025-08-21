@@ -35,6 +35,7 @@ const BidForm = () => {
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
+    console.log('wishId from useParams:', wishId); // Debug wishId
     if (!wishId) {
       setFetchError('Invalid wish ID');
       return;
@@ -58,6 +59,7 @@ const BidForm = () => {
           }
         }
         const wishData = await response.json();
+        console.log('Wish data in BidForm:', wishData); // Debug wish data
         setWishOwnerId(wishData.createdBy._id);
       } catch (err) {
         setFetchError(err.message);

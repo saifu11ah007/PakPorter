@@ -31,7 +31,6 @@ const getWishIdFromUrl = () => {
   return null;
 };
 
-// Check authentication
 const useAuth = () => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,7 +39,6 @@ const useAuth = () => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      // Simulate fetching user data (replace with actual API call if needed)
       const userData = { id: 'current-user-id', name: 'Current User', token };
       setUser(userData);
       setIsAuthenticated(true);
@@ -51,7 +49,6 @@ const useAuth = () => {
   return { user, isAuthenticated, loading };
 };
 
-// Loading skeleton component
 const WishDetailSkeleton = () => (
   <div className="animate-pulse">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -70,7 +67,6 @@ const WishDetailSkeleton = () => (
   </div>
 );
 
-// Image gallery component
 const ImageGallery = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
@@ -151,7 +147,6 @@ const ImageGallery = ({ images }) => {
   );
 };
 
-// Main component
 const WishDetailPage = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [wish, setWish] = useState(null);
@@ -168,6 +163,7 @@ const WishDetailPage = () => {
         setLoading(true);
         setError(null);
         
+        console.log('Fetching wish with ID:', wishId); // Debug wishId
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
           headers: {
             Authorization: `Bearer ${user?.token}`,
@@ -187,6 +183,7 @@ const WishDetailPage = () => {
         }
 
         const wishData = await response.json();
+        console.log('Wish data:', wishData); // Debug wish data
         setWish(wishData);
       } catch (err) {
         console.error('Error fetching wish:', err);
@@ -226,7 +223,16 @@ const WishDetailPage = () => {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
-    // In real app, you would save this to user's bookmarks
+  };
+
+  const handlePlaceBid = () => {
+    if (!wish?._id) {
+      console.error('Wish ID is undefined');
+      alert('Cannot place bid: Wish data not loaded');
+      return;
+    }
+    console.log('Navigating to bid form with wishId:', wish._id);
+    navigate(`/wish/${wish._id}/bid`);
   };
 
   if (authLoading || loading) {
@@ -465,6 +471,7 @@ const WishDetailPage = () => {
                   <button
                     onClick={() => navigate(`/wish/${wish._id}/bids`)}
                     className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2"
+                    disabled={!wish._id}
                   >
                     <Eye className="w-5 h-5" />
                     View All Bids
@@ -472,8 +479,8 @@ const WishDetailPage = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => navigate(`/wish/${wish._id}/bid`)}
-                  disabled={isExpired || wish.isFulfilled}
+                  onClick={handlePlaceBid}
+                  disabled={isExpired || wish.isFulfilled || !wish._id}
                   className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   <DollarSign className="w-5 h-5" />
