@@ -1,10 +1,29 @@
-import  { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const BidForm = ({ user, wishOwnerId }) => {
+const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setUser({ id: 'current-user-id', name: 'Current User', token });
+      setIsAuthenticated(true);
+    }
+    setLoading(false);
+  }, []);
+
+  return { user, isAuthenticated, loading };
+};
+
+const BidForm = ({ wishOwnerId }) => {
   const { wishId } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading } = useAuth();
   const [bidAmount, setBidAmount] = useState('');
   const [message, setMessage] = useState('');
   const [deliveryDate, setDeliveryDate] = useState('');
@@ -43,7 +62,7 @@ const BidForm = ({ user, wishOwnerId }) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/bids/${wishId}`, {
+      const response = await fetch(`/api/bids/${wishId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +82,10 @@ const BidForm = ({ user, wishOwnerId }) => {
 
       setIsSubmitted(true);
       setAlert({ type: 'success', message: 'Your bid has been placed successfully!' });
-      setTimeout(() => setAlert(null), 3000);
+      setTimeout(() => {
+        setAlert(null);
+        navigate(`/wish/${wishId}`);
+      }, 3000);
     } catch (error) {
       setAlert({ type: 'error', message: error.message });
       setTimeout(() => setAlert(null), 3000);
@@ -71,6 +93,17 @@ const BidForm = ({ user, wishOwnerId }) => {
       setIsLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -101,7 +134,7 @@ const BidForm = ({ user, wishOwnerId }) => {
               </h2>
             </div>
             <div className="p-6 space-y-4">
-              {!user ? (
+              {!isAuthenticated ? (
                 <div className="flex items-center justify-center text-red-500">
                   <AlertCircle className="h-5 w-5 mr-2" />
                   <p>Please log in to place a bid.</p>

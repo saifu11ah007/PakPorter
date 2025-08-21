@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -16,14 +17,12 @@ import {
   Shield,
   Truck,
   MessageCircle,
-
   AlertCircle,
   CheckCircle,
   ExternalLink
 } from 'lucide-react';
 
 const getWishIdFromUrl = () => {
-  // Extract ID from current URL path
   const pathParts = window.location.pathname.split('/');
   const wishIndex = pathParts.indexOf('wish');
   if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
@@ -41,10 +40,10 @@ const useAuth = () => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      // In a real app, you might decode the JWT to get user info
-      // or make an API call to get current user
+      // Simulate fetching user data (replace with actual API call if needed)
+      const userData = { id: 'current-user-id', name: 'Current User', token }; // Include token
+      setUser(userData);
       setIsAuthenticated(true);
-      setUser({ id: 'current-user-id', name: 'Current User' });
     }
     setLoading(false);
   }, []);
@@ -76,7 +75,6 @@ const ImageGallery = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
 
-  // Show placeholder if no images
   if (!images || images.length === 0) {
     return (
       <div className="aspect-square bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center">
@@ -90,7 +88,6 @@ const ImageGallery = ({ images }) => {
 
   return (
     <div className="space-y-4">
-      {/* Main Image */}
       <div className="relative group">
         <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
           <img
@@ -111,8 +108,6 @@ const ImageGallery = ({ images }) => {
           </div>
         </div>
       </div>
-
-      {/* Thumbnail Images */}
       {images.length > 1 && (
         <div className="flex gap-2 overflow-x-auto">
           {images.map((image, index) => (
@@ -135,8 +130,6 @@ const ImageGallery = ({ images }) => {
           ))}
         </div>
       )}
-
-      {/* Zoom Modal */}
       {showZoom && (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
           <div className="relative max-w-4xl max-h-full">
@@ -166,7 +159,7 @@ const WishDetailPage = () => {
   const [error, setError] = useState(null);
   const [stickyHeader, setStickyHeader] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-
+  const navigate = useNavigate();
   const wishId = getWishIdFromUrl();
 
   useEffect(() => {
@@ -201,7 +194,6 @@ const WishDetailPage = () => {
       fetchWishDetails();
     }
 
-    // Sticky header scroll listener
     const handleScroll = () => {
       setStickyHeader(window.scrollY > 200);
     };
@@ -218,7 +210,6 @@ const WishDetailPage = () => {
         url: window.location.href,
       });
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
@@ -283,7 +274,6 @@ const WishDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sticky Header */}
       <div className={`fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 transition-all duration-200 ${
         stickyHeader ? 'translate-y-0 shadow-sm' : '-translate-y-full'
       }`}>
@@ -304,7 +294,6 @@ const WishDetailPage = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
           <button 
             onClick={() => window.location.href = '/'}
@@ -323,7 +312,6 @@ const WishDetailPage = () => {
           <span className="text-gray-900">Product Details</span>
         </nav>
 
-        {/* Back Button */}
         <button 
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -332,16 +320,12 @@ const WishDetailPage = () => {
           Back to Wishes
         </button>
 
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Image Gallery */}
           <div>
             <ImageGallery images={wish.images} />
           </div>
 
-          {/* Wish Details */}
           <div className="space-y-6">
-            {/* Header */}
             <div>
               <div className="flex items-start justify-between mb-3">
                 <h1 className="text-3xl font-bold text-gray-900 leading-tight">{wish.title}</h1>
@@ -363,7 +347,6 @@ const WishDetailPage = () => {
                 </div>
               </div>
 
-              {/* Price */}
               <div className="flex items-baseline gap-3 mb-4">
                 <div className="text-3xl font-bold text-blue-600">
                   Rs. {wish.basePrice.toLocaleString()}
@@ -371,7 +354,6 @@ const WishDetailPage = () => {
                 <div className="text-sm text-gray-500">Budget</div>
               </div>
 
-              {/* Status and Deadline */}
               <div className="flex items-center gap-4 text-sm">
                 <div className={`flex items-center gap-1 ${isExpired ? 'text-red-600' : 'text-orange-600'}`}>
                   <Clock className="w-4 h-4" />
@@ -391,7 +373,6 @@ const WishDetailPage = () => {
               </div>
             </div>
 
-            {/* Key Details */}
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gray-700">
                 <MapPin className="w-5 h-5 text-gray-400" />
@@ -427,7 +408,6 @@ const WishDetailPage = () => {
               </div>
             </div>
 
-            {/* Product Link */}
             {wish.productLink && (
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
@@ -445,7 +425,6 @@ const WishDetailPage = () => {
               </div>
             )}
 
-            {/* Action Buttons */}
             <div className="space-y-3">
               {!isAuthenticated ? (
                 <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -475,17 +454,18 @@ const WishDetailPage = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/wish/${wish._id}/bids`}
+                    onClick={() => navigate(`/wish/${wish._id}/bids`)}
                     className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2"
                   >
                     <Eye className="w-5 h-5" />
-                    View Bids ({wish.acceptedBid ? '1 Accepted' : 'Manage Bids'})
+                    View All Bids
                   </button>
                 </div>
               ) : (
                 <button
+                  onClick={() => navigate(`/wish/${wish._id}/bid`)}
                   disabled={isExpired || wish.isFulfilled}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
                   <DollarSign className="w-5 h-5" />
                   {wish.isFulfilled ? 'Wish Fulfilled' : isExpired ? 'Bidding Closed' : 'Place Bid'}
@@ -495,7 +475,6 @@ const WishDetailPage = () => {
           </div>
         </div>
 
-        {/* Description */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Description</h3>
           <div className="prose prose-gray max-w-none">
@@ -505,7 +484,6 @@ const WishDetailPage = () => {
           </div>
         </div>
 
-        {/* Additional Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
             <Shield className="w-8 h-8 text-blue-600 mx-auto mb-3" />
