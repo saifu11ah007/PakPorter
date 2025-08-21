@@ -9,7 +9,7 @@ const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     console.log('useAuth: authToken from localStorage:', token); // Debug token
     if (token) {
       const userData = { id: 'current-user-id', name: 'Current User', token };
