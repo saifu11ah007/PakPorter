@@ -21,6 +21,7 @@ import {
   CheckCircle,
   ExternalLink
 } from 'lucide-react';
+import jwtDecode from 'jwt-decode'; // Requires: npm install jwt-decode
 
 const getWishIdFromUrl = () => {
   const pathParts = window.location.pathname.split('/');
@@ -91,7 +92,7 @@ const ImageGallery = ({ images }) => {
             alt="Wish product"
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTAwQzE2Ni42NjcgMTAwIDEzMy4zMzMgMTAwIDEwMCAxMDBWMzAwSDE2Ni42NjdIMjMzLjMzM0gzMDBWMTAwQzI2Ni42NjcgMTAwIDIzMy4zMzMgMTAwIDIwMCAxMDBaIiBmaWxsPSIjRTVFN0VCIi8+Cjwvc3ZnPgo=';
+              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTAwQzE2Ni42NjcgMTAwIDEzMy4zMzMgMTAwIDEwMCAxMDBWMzAwSDE2Ni42NjdIMjMzLjMzM0gzMDBWMTAwQzI2Ni66NjY3MTAwIDIzMy4zMzMgMTAwIDIwMCAxMDBaIiBmaWxsPSIjRTVFN0VCIi8+Cjwvc3ZnPgo=';
             }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
@@ -156,26 +157,45 @@ const WishDetailPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
   const wishId = getWishIdFromUrl();
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchWishDetails = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        console.log('Fetching wish with ID:', wishId); // Debug wishId
+
+        console.log('Fetching wish with ID:', wishId); // Line 166
+        const token = localStorage.getItem('authToken');
+        console.log('fetchWishDetails: authToken:', token ? 'Present' : 'Missing'); // Debug token
+        if (token) {
+          try {
+            const decoded = jwtDecode(token);
+            console.log('fetchWishDetails: Decoded user ID:', decoded._id); // Debug user ID
+            setUserId(decoded._id);
+          } catch (err) {
+            console.error('fetchWishDetails: Token decode error:', err.message);
+            setError('Invalid authentication token');
+            localStorage.removeItem('authToken');
+            setTimeout(() => navigate('/login'), 2000);
+            setLoading(false);
+            return;
+          }
+        }
+
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
           headers: {
-            Authorization: `Bearer ${user?.token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Wish not found');
           } else if (response.status === 400) {
             throw new Error('Invalid wish ID');
           } else if (response.status === 401) {
+            localStorage.removeItem('authToken');
             throw new Error('Please log in to view this wish');
           } else {
             throw new Error('Failed to fetch wish details');
@@ -183,7 +203,7 @@ const WishDetailPage = () => {
         }
 
         const wishData = await response.json();
-        console.log('Wish data:', wishData); // Debug wish data
+        console.log('Wish data:', wishData); // Line 186
         setWish(wishData);
       } catch (err) {
         console.error('Error fetching wish:', err);
@@ -206,7 +226,7 @@ const WishDetailPage = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [wishId, user]);
+  }, [wishId, user, navigate]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -223,15 +243,11 @@ const WishDetailPage = () => {
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+    // In real app, you would save this to user's bookmarks
   };
 
   const handlePlaceBid = () => {
-    if (!wish?._id) {
-      console.error('Wish ID is undefined');
-      alert('Cannot place bid: Wish data not loaded');
-      return;
-    }
-    console.log('Navigating to bid form with wishId:', wish._id);
+    console.log('handlePlaceBid: Navigating to bid form with wishId:', wish._id); // Line 234
     navigate(`/bid/${wish._id}`);
   };
 
@@ -283,7 +299,7 @@ const WishDetailPage = () => {
     );
   }
 
-  const isOwner = isAuthenticated && user && wish.createdBy._id === user.id;
+  const isOwner = userId && wish.createdBy._id === userId;
   const daysLeft = Math.max(0, Math.ceil((new Date(wish.deliveryDeadline) - new Date()) / (1000 * 60 * 60 * 24)));
   const isExpired = new Date(wish.deliveryDeadline) < new Date();
 
