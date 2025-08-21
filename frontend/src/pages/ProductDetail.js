@@ -41,7 +41,7 @@ const useAuth = () => {
     const token = localStorage.getItem('authToken');
     if (token) {
       // Simulate fetching user data (replace with actual API call if needed)
-      const userData = { id: 'current-user-id', name: 'Current User', token }; // Include token
+      const userData = { id: 'current-user-id', name: 'Current User', token };
       setUser(userData);
       setIsAuthenticated(true);
     }
@@ -168,13 +168,19 @@ const WishDetailPage = () => {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        });
         
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Wish not found');
           } else if (response.status === 400) {
             throw new Error('Invalid wish ID');
+          } else if (response.status === 401) {
+            throw new Error('Please log in to view this wish');
           } else {
             throw new Error('Failed to fetch wish details');
           }
@@ -190,8 +196,11 @@ const WishDetailPage = () => {
       }
     };
 
-    if (wishId) {
+    if (wishId && user?.token) {
       fetchWishDetails();
+    } else {
+      setLoading(false);
+      setError('Please log in to view this wish');
     }
 
     const handleScroll = () => {
@@ -200,7 +209,7 @@ const WishDetailPage = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [wishId]);
+  }, [wishId, user]);
 
   const handleShare = () => {
     if (navigator.share) {
