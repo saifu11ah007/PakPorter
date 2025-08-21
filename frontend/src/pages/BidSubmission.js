@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -19,9 +19,16 @@ const useAuth = () => {
 
   return { user, isAuthenticated, loading };
 };
-
+const getWishIdFromUrl = () => {
+  const pathParts = window.location.pathname.split('/');
+  const wishIndex = pathParts.indexOf('bid');
+  if (wishIndex !== -1 && pathParts[wishIndex + 1]) {
+    return pathParts[wishIndex + 1];
+  }
+  return null;
+};
 const BidForm = () => {
-  const { wishId } = useParams();
+  const { wishId } = getWishIdFromUrl();
   const navigate = useNavigate();
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const [wishOwnerId, setWishOwnerId] = useState(null);
