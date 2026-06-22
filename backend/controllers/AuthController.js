@@ -3,9 +3,9 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import sendEmailOTP from '../config/OTP.js';
-import { createWorker } from 'tesseract.js';
+import Tesseract from 'tesseract.js';
 import stringSimilarity from 'string-similarity';
-import path from 'path';
+// path import removed – not needed
 
 const otpMemory = {}; // in-memory store for OTP and signup data
 
@@ -127,14 +127,11 @@ const completeSignup = async (req, res) => {
     }
     const imageBuffer = await imageResponse.arrayBuffer();
 
-    // OCR with tesseract.js worker – custom corePath for Vercel
-    const wasmPath = path.resolve(__dirname, '..', 'tesseract', 'tesseract-core-relaxedsimd.wasm');
-    const worker = createWorker({ corePath: wasmPath });
-    await worker.load();
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
-    const { data: { text: rawOcrText } } = await worker.recognize(Buffer.from(imageBuffer));
-    await worker.terminate();
+    // OCR using tesseract.js high‑level API (no worker needed)
+      const { data: { text: rawOcrText } } = await Tesseract.recognize(
+        Buffer.from(imageBuffer),
+        'eng'
+      );
     // 1️⃣ Clean the OCR output – remove non‑ASCII characters and normalize whitespace
     const ocrText = rawOcrText.replace(/[^\x00-\x7F]/g, '').replace(/[\r\n]+/g, '\n');
     console.log('🧠 OCR Text:', ocrText);
