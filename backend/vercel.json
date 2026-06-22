@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "api/express.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": "backend/node_modules/tesseract.js-core/**/*.wasm"
+      }
     }
   ],
   "routes": [
@@ -11,10 +14,5 @@
       "src": "/(.*)",
       "dest": "api/express.js"
     }
-  ],
-  "functions": {
-    "api/**/*.js": {
-      "includeFiles": "backend/node_modules/tesseract.js-core/**/*.wasm"
-    }
-  }
+  ]
 }
