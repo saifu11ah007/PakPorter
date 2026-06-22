@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
-import bodyParser  from 'body-parser';
+import bodyParser from 'body-parser';
 import AuthRouter from './routes/AuthRouter.js';
 import sendEmailOTP from './config/OTP.js';
 import WishRouter from './routes/WishRouter.js';
@@ -10,7 +10,7 @@ import BidRouter from './routes/BidRouter.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+// added cors to env
 app.use(bodyParser.json());
 const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 app.use(cors({
@@ -36,7 +36,7 @@ async function startServer() {
     process.exit(1);
   }
 }
-app.use('/auth',AuthRouter);
-app.use('/wish',WishRouter);
+app.use('/auth', AuthRouter);
+app.use('/wish', WishRouter);
 app.use('/bids', BidRouter);
 startServer();
