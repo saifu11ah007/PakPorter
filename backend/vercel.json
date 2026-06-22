@@ -1,15 +1,20 @@
 {
-         "version": 2,
-         "builds": [
-           {
-             "src": "api/express.js",
-             "use": "@vercel/node"
-           }
-         ],
-         "routes": [
-           {
-             "src": "/(.*)",
-             "dest": "api/express.js"
-           }
-         ]
-       }
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/express.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/express.js"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "includeFiles": ["tesseract/**"]
+    }
+  }
+}

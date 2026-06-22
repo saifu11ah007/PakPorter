@@ -128,7 +128,7 @@ const completeSignup = async (req, res) => {
     const imageBuffer = await imageResponse.arrayBuffer();
 
     // OCR with tesseract.js (default high‑level API)
-    const wasmPath = path.join(process.cwd(), 'tesseract', 'tesseract-core.wasm');
+    const wasmPath = path.join(process.cwd(), 'tesseract', 'tesseract-core-relaxedsimd.wasm');
 const { data: { text: rawOcrText } } = await Tesseract.recognize(
   Buffer.from(imageBuffer),
   'eng',
