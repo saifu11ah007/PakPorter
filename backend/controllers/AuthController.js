@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import sendEmailOTP from '../config/OTP.js';
 import Tesseract from 'tesseract.js';
 import stringSimilarity from 'string-similarity';
+import path from 'path';
 
 const otpMemory = {}; // in-memory store for OTP and signup data
 
@@ -127,7 +128,12 @@ const completeSignup = async (req, res) => {
     const imageBuffer = await imageResponse.arrayBuffer();
 
     // OCR with tesseract.js (default high‑level API)
-    const { data: { text: rawOcrText } } = await Tesseract.recognize(Buffer.from(imageBuffer), 'eng');
+    const wasmPath = path.join(process.cwd(), 'tesseract', 'tesseract-core.wasm');
+const { data: { text: rawOcrText } } = await Tesseract.recognize(
+  Buffer.from(imageBuffer),
+  'eng',
+  { corePath: wasmPath }
+);
     // 1️⃣ Clean the OCR output – remove non‑ASCII characters and normalize whitespace
     const ocrText = rawOcrText.replace(/[^\x00-\x7F]/g, '').replace(/[\r\n]+/g, '\n');
     console.log('🧠 OCR Text:', ocrText);
