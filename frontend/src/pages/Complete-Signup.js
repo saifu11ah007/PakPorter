@@ -174,7 +174,7 @@ const PakPorterSignupFinal = () => {
     navigate("/login"); // Redirect to login page after completion
   } catch (error) {
     console.error('Submission error:', error);
-    alert('An error occurred. Please try again.');
+    alert(error.message);
   } finally {
     setIsSubmitting(false);
   }
