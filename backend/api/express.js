@@ -11,12 +11,20 @@ import BidRouter from '../routes/BidRouter.js';
        const app = express();
 
        app.use(express.json());
-       app.use(cors({ 
-         origin: 'https://pakporter-fyp.netlify.app',
-         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-         allowedHeaders: ['Content-Type', 'Authorization'], // Allow these headers
-          credentials: true
-       }));
+        // CORS origins are driven by the CORS_ORIGINS env var (comma‑separated).
+        const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(o => o.trim()) || [];
+        app.use(cors({
+          origin: function (origin, callback) {
+            // allow non‑browser requests (no origin)
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes(origin)) return callback(null, true);
+            // reject other origins – Vercel will still handle production via env config
+            return callback(null, false);
+          },
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: ['Content-Type', 'Authorization'],
+          credentials: true,
+        }));
        app.get('/', (req, res) => res.send('PakPorter'));
 
        app.use('/auth', AuthRouter);

@@ -27,8 +27,14 @@ const signup = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     otpMemory[email] = { otp, fullName, email, password, cnicNumber };
-    await sendEmailOTP(email, otp);
-    return res.status(200).json({ success: true, message: 'OTP sent to email' });
+    // If email credentials are not set, skip actual email sending in local dev
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      await sendEmailOTP(email, otp);
+      console.log('✅ OTP email sent to', email);
+    } else {
+      console.warn('⚠️ EMAIL_USER / EMAIL_PASS not configured – skipping real email send');
+    }
+    return res.status(200).json({ success: true, message: 'OTP sent (email skipped in dev)' });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Signup error', error: error.message });
   }
