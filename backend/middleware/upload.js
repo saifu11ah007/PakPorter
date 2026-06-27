@@ -7,21 +7,23 @@ import multer from 'multer';
 
        export const saveToBlob = async (req, res, next) => {
          try {
-           if (req.files.cnicFront) {
-             const { url } = await put(`cnicFront-${Date.now()}.jpg`, req.files.cnicFront[0].buffer, {
-               access: 'public',
-               token: process.env.BLOB_READ_WRITE_TOKEN,
-               addRandomSuffix: true
-             });
-             req.files.cnicFront[0].key = url;
-           }
-           if (req.files.cnicBack) {
-             const { url } = await put(`cnicBack-${Date.now()}.jpg`, req.files.cnicBack[0].buffer, {
-               access: 'public',
-               token: process.env.BLOB_READ_WRITE_TOKEN,
-               addRandomSuffix: true
-             });
-             req.files.cnicBack[0].key = url;
+           if (process.env.BLOB_READ_WRITE_TOKEN) {
+             if (req.files.cnicFront) {
+               const { url } = await put(`cnicFront-${Date.now()}.jpg`, req.files.cnicFront[0].buffer, {
+                 access: 'public',
+                 token: process.env.BLOB_READ_WRITE_TOKEN,
+                 addRandomSuffix: true
+               });
+               req.files.cnicFront[0].key = url;
+             }
+             if (req.files.cnicBack) {
+               const { url } = await put(`cnicBack-${Date.now()}.jpg`, req.files.cnicBack[0].buffer, {
+                 access: 'public',
+                 token: process.env.BLOB_READ_WRITE_TOKEN,
+                 addRandomSuffix: true
+               });
+               req.files.cnicBack[0].key = url;
+             }
            }
            next();
          } catch (error) {

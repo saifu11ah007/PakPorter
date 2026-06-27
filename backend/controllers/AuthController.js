@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import sendEmailOTP from '../config/OTP.js';
 import Tesseract from 'tesseract.js';
 import stringSimilarity from 'string-similarity';
-// path import removed – not needed
 
 const otpMemory = {}; // in-memory store for OTP and signup data
 
@@ -31,9 +30,9 @@ const signup = async (req, res) => {
     otpMemory[email] = { otp, fullName, email, password, cnicNumber };
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       await sendEmailOTP(email, otp);
-      console.log('✅ OTP email sent to', email);
+      console.log('OTP email sent to', email);
     } else {
-      console.warn('⚠️ EMAIL_USER / EMAIL_PASS not configured – skipping real email send');
+      console.warn(' EMAIL_USER / EMAIL_PASS not configured – skipping real email send');
     }
     return res.status(200).json({ success: true, message: 'OTP sent (email skipped in dev)' });
   } catch (error) {
@@ -112,26 +111,32 @@ const resendOTP = async (req, res) => {
 const completeSignup = async (req, res) => {
   try {
     const { email, phone, country, city } = req.body;
-    const cnicFront = req.files?.cnicFront?.[0]?.key; // Vercel Blob URL
-    const cnicBack = req.files?.cnicBack?.[0]?.key;
-
     const pendingUser = otpMemory[email];
     if (!pendingUser || !pendingUser.verified) {
       return res.status(400).json({ message: 'OTP not verified or missing data' });
     }
 
-    // Fetch CNIC front image
-    const imageResponse = await fetch(cnicFront);
-    if (!imageResponse.ok) {
-      return res.status(400).json({ success: false, message: 'Unable to fetch CNIC image' });
+    const cnicFrontFile = req.files?.cnicFront?.[0];
+    const cnicBackFile = req.files?.cnicBack?.[0];
+    const cnicFront = cnicFrontFile?.key || cnicFrontFile?.buffer;
+    const cnicBack = cnicBackFile?.key || cnicBackFile?.buffer;
+
+    let imageBuffer;
+    if (cnicFrontFile?.key) {
+      const imageResponse = await fetch(cnicFront);
+      if (!imageResponse.ok) return res.status(400).json({ success: false, message: 'Unable to fetch CNIC image' });
+      imageBuffer = await imageResponse.arrayBuffer();
+    } else if (cnicFrontFile?.buffer) {
+      imageBuffer = cnicFrontFile.buffer;
+    } else {
+      return res.status(400).json({ success: false, message: 'CNIC image is missing' });
     }
-    const imageBuffer = await imageResponse.arrayBuffer();
 
     // OCR using tesseract.js high‑level API (no worker needed)
-      const { data: { text: rawOcrText } } = await Tesseract.recognize(
-        Buffer.from(imageBuffer),
-        'eng'
-      );
+    const { data: { text: rawOcrText } } = await Tesseract.recognize(
+      Buffer.from(imageBuffer),
+      'eng'
+    );
     // 1️⃣ Clean the OCR output – remove non‑ASCII characters and normalize whitespace
     const ocrText = rawOcrText.replace(/[^\x00-\x7F]/g, '').replace(/[\r\n]+/g, '\n');
     console.log('🧠 OCR Text:', ocrText);
@@ -152,7 +157,7 @@ const completeSignup = async (req, res) => {
       if (plainMatch) {
         const digits = plainMatch[0];
         // Re‑format to 5‑7‑1 pattern
-        extractedCnic = `${digits.slice(0,5)}-${digits.slice(5,12)}-${digits.slice(12)}`;
+        extractedCnic = `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
       }
     }
     console.log('🔎 Extracted CNIC:', extractedCnic);
