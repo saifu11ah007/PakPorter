@@ -6,6 +6,7 @@ import sendEmailOTP from '../config/OTP.js';
 import Tesseract from 'tesseract.js';
 import stringSimilarity from 'string-similarity';
 
+
 const otpMemory = {}; // in-memory store for OTP and signup data
 
 // Signup: creates OTP and stores pending user data
@@ -132,7 +133,7 @@ const completeSignup = async (req, res) => {
       return res.status(400).json({ success: false, message: 'CNIC image is missing' });
     }
 
-    // OCR using tesseract.js high‑level API (no worker needed)
+    // OCR using tesseract.js
     const { data: { text: rawOcrText } } = await Tesseract.recognize(
       Buffer.from(imageBuffer),
       'eng'

@@ -5,7 +5,12 @@
       "src": "api/express.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": "backend/node_modules/tesseract.js-core/**/*.wasm"
+        "includeFiles": [
+          "node_modules/tesseract.js-core/**",
+          "node_modules/tesseract.js/**",
+          "eng.traineddata"
+        ],
+        "maxLambdaSize": "50mb"
       }
     }
   ],
@@ -15,4 +20,4 @@
       "dest": "api/express.js"
     }
   ]
-}
+}
