@@ -21,7 +21,7 @@ app.use(cors({
     // fallback to default for other origins (e.g., production)
     return callback(null, true); // allow all in production
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));

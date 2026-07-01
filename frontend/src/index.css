@@ -1,3 +1,157 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Light Mode Variables */
+  --background: #f0f4f8;
+  --surface: #e8edf2;
+  --card-base: #dde3ea;
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --brand-primary: #0061ff;
+  --brand-accent: #00c6ff;
+  --success: #38a169;
+  --warning: #d69e2e;
+  --error: #e53e3e;
+
+  /* Neumorphic Shadows for Light Mode */
+  --neo-shadow-flat: 8px 8px 16px #c8cdd2, -8px -8px 16px #ffffff;
+  --neo-shadow-flat-hover: 12px 12px 24px #b8bdc2, -12px -12px 24px #ffffff;
+  --neo-shadow-pressed: inset 6px 6px 12px #c8cdd2, inset -6px -6px 12px #ffffff;
+  --neo-shadow-input: inset 4px 4px 8px #c8cdd2, inset -4px -4px 8px #ffffff;
+  --neo-shadow-button-brand: 4px 4px 12px rgba(0, 97, 255, 0.4), -2px -2px 8px rgba(0, 198, 255, 0.2);
+}
+
+[data-theme="dark"] {
+  /* Dark Mode Variables */
+  --background: #1a1f2e;
+  --surface: #222736;
+  --card-base: #2a3040;
+  --text-primary: #f7fafc;
+  --text-secondary: #a0aec0;
+  --brand-primary: #0061ff;
+  --brand-accent: #00c6ff;
+
+  /* Neumorphic Shadows for Dark Mode */
+  --neo-shadow-flat: 8px 8px 16px #131722, -8px -8px 16px #2b3144;
+  --neo-shadow-flat-hover: 12px 12px 24px #0f121b, -12px -12px 24px #2f364b;
+  --neo-shadow-pressed: inset 6px 6px 12px #131722, inset -6px -6px 12px #2b3144;
+  --neo-shadow-input: inset 4px 4px 8px #131722, inset -4px -4px 8px #2b3144;
+  --neo-shadow-button-brand: 4px 4px 16px rgba(0, 97, 255, 0.5), -2px -2px 8px rgba(0, 198, 255, 0.15);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-textPrimary font-body transition-colors duration-300 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight text-textPrimary;
+  }
+}
+
+@layer utilities {
+  /* Neumorphism Utility Classes */
+  .neo-flat {
+    background-color: var(--surface);
+    box-shadow: var(--neo-shadow-flat);
+    border-radius: 20px;
+    border: none;
+    transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  }
+
+  .neo-flat-hover:hover {
+    box-shadow: var(--neo-shadow-flat-hover);
+    transform: translateY(-4px);
+  }
+
+  .neo-pressed {
+    box-shadow: var(--neo-shadow-pressed);
+    background-color: var(--surface);
+    border-radius: 20px;
+    border: none;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+
+  .neo-button-brand {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+    box-shadow: var(--neo-shadow-button-brand);
+    color: white;
+    border-radius: 14px;
+    border: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .neo-button-brand:active {
+    opacity: 0.9;
+    transform: scale(0.97);
+  }
+
+  .neo-button-outline {
+    background-color: var(--surface);
+    box-shadow: var(--neo-shadow-flat);
+    color: var(--brand-primary);
+    border: 2px solid transparent;
+    background-image: linear-gradient(var(--surface), var(--surface)), linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    border-radius: 14px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .neo-button-outline:active {
+    box-shadow: var(--neo-shadow-pressed);
+    transform: scale(0.97);
+  }
+
+  .neo-input {
+    box-shadow: var(--neo-shadow-input);
+    background-color: var(--surface);
+    border: none;
+    border-radius: 14px;
+    color: var(--text-primary);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+
+  .neo-input:focus {
+    outline: none;
+    box-shadow: var(--neo-shadow-input), 0 0 0 2px var(--brand-primary);
+  }
+
+  /* Shifting hue radial animation */
+  .animate-radial-gradient {
+    background: radial-gradient(circle at 50% 50%, rgba(0, 97, 255, 0.15) 0%, rgba(0, 198, 255, 0.05) 50%, transparent 100%);
+    animation: shiftHue 15s infinite alternate ease-in-out;
+  }
+
+  @keyframes shiftHue {
+    0% {
+      filter: hue-rotate(0deg) scale(1);
+    }
+    100% {
+      filter: hue-rotate(45deg) scale(1.1);
+    }
+  }
+
+  /* Infinite scroll carousel animation */
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll {
+    display: flex;
+    width: max-content;
+    animation: scroll 25s linear infinite;
+  }
+
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
+}

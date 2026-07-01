@@ -1,372 +1,737 @@
-import React, { useState } from 'react';
-import { User, Mail, Lock, Eye, EyeOff, CreditCard, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
-import { useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Mail, Lock, Eye, EyeOff, CreditCard, Phone, MapPin, Upload, Check, AlertCircle, RefreshCw, Globe } from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
-const AccountDetailsPage = () => {
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+const Signup = () => {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    cnic: '',
     password: '',
     confirmPassword: '',
-    cnic: '',
+    phone: '',
+    city: 'Lahore',
+    country: 'Pakistan',
   });
-  useEffect(() => {
-    // const savedData = JSON.parse(localStorage.getItem("signupData"));
-    
-  }, []);
 
-  const navigate = useNavigate();
+  // Verification files
+  const [cnicFrontFile, setCnicFrontFile] = useState(null);
+  const [cnicBackFile, setCnicBackFile] = useState(null);
+  const [previews, setPreviews] = useState({ front: null, back: null });
+  const [isProcessingFiles, setIsProcessingFiles] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState(null); // 'success' | 'error' | null
+  const [ocrMessage, setOcrMessage] = useState('');
+
+  // Password Visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Field Blur Validation States
+  const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
+
+  // OTP State
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpTimer, setOtpTimer] = useState(90); // 1:30 in seconds
+  const [canResendOtp, setCanResendOtp] = useState(false);
+  const [otpError, setOtpError] = useState(false);
+  const [otpSuccess, setOtpSuccess] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  // Focus helper for OTP boxes
+  const otpInputsRef = useRef([]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (step === 2 && otpTimer > 0) {
+      const interval = setInterval(() => {
+        setOtpTimer(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (otpTimer === 0) {
+      setCanResendOtp(true);
+    }
+  }, [step, otpTimer]);
+
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `Resend in ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // CNIC Formatting helper
+  const handleCnicChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 13);
+    let formatted = value;
+    if (value.length > 5 && value.length <= 12) {
+      formatted = `${value.slice(0, 5)}-${value.slice(5)}`;
+    } else if (value.length > 12) {
+      formatted = `${value.slice(0, 5)}-${value.slice(5, 12)}-${value.slice(12)}`;
+    }
+    setFormData(prev => ({ ...prev, cnic: formatted }));
+    validateField('cnic', formatted);
+  };
+
+  // Field Validation
+  const validateField = (field, value) => {
+    let err = '';
+    const val = value !== undefined ? value : formData[field];
+    
+    if (field === 'fullName') {
+      if (!val.trim()) err = 'Full Name is required';
+    } else if (field === 'email') {
+      if (!val.trim()) err = 'Email is required';
+      else if (!/\S+@\S+\.\S+/.test(val)) err = 'Invalid email address';
+    } else if (field === 'cnic') {
+      const clean = val.replace(/\D/g, '');
+      if (!val.trim()) err = 'CNIC is required';
+      else if (clean.length !== 13) err = 'CNIC must be 13 digits';
+    } else if (field === 'password') {
+      if (!val) err = 'Password is required';
+      else if (val.length < 8) err = 'Must be at least 8 characters';
+    } else if (field === 'confirmPassword') {
+      if (!val) err = 'Please confirm password';
+      else if (val !== formData.password) err = 'Passwords do not match';
+    } else if (field === 'phone') {
+      if (!val.trim()) err = 'Phone number is required';
+    }
+
+    setErrors(prev => ({ ...prev, [field]: err }));
+    return !err;
+  };
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    validateField(field);
+  };
+
+  // OTP Inputs handling
+  const handleOtpChange = (index, val) => {
+    if (/^\d*$/.test(val)) {
+      const newOtp = [...otp];
+      newOtp[index] = val.slice(-1);
+      setOtp(newOtp);
+
+      if (val && index < 5) {
+        otpInputsRef.current[index + 1]?.focus();
+      }
     }
   };
 
-  const formatCNIC = (value) => {
-    const digits = value.replace(/\D/g, '');
-    const limitedDigits = digits.slice(0, 13);
-    let formatted = limitedDigits;
-    if (limitedDigits.length > 5) {
-      formatted = limitedDigits.slice(0, 5) + '-' + limitedDigits.slice(5);
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputsRef.current[index - 1]?.focus();
     }
-    if (limitedDigits.length > 12) {
-      formatted = limitedDigits.slice(0, 5) + '-' + limitedDigits.slice(5, 12) + '-' + limitedDigits.slice(12);
-    }
-    return formatted;
   };
 
-  const handleCNICChange = (e) => {
-    const formatted = formatCNIC(e.target.value);
-    handleInputChange('cnic', formatted);
+  // Upload Preview handler
+  const handleFileChange = (e, target) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (target === 'front') {
+        setCnicFrontFile(file);
+        setPreviews(prev => ({ ...prev, front: URL.createObjectURL(file) }));
+      } else {
+        setCnicBackFile(file);
+        setPreviews(prev => ({ ...prev, back: URL.createObjectURL(file) }));
+      }
+    }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
+  // Step submissions
+  const handleStep1Submit = async (e) => {
+    e.preventDefault();
+    
+    // Validate all Step 1 fields
+    const isNameValid = validateField('fullName');
+    const isEmailValid = validateField('email');
+    const isCnicValid = validateField('cnic');
+    const isPassValid = validateField('password');
+    const isConfirmValid = validateField('confirmPassword');
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    if (!formData.cnic) {
-      newErrors.cnic = 'CNIC is required';
-    } else if (formData.cnic.replace(/\D/g, '').length !== 13) {
-      newErrors.cnic = 'CNIC must be 13 digits';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-  if (!validateForm()) return;
-
-  setIsLoading(true);
-
-  try {
-    const { fullName, email, password, cnic } = formData;
-
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/send-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fullName, email, password, cnicNumber: cnic })
+    setTouched({
+      fullName: true,
+      email: true,
+      cnic: true,
+      password: true,
+      confirmPassword: true
     });
 
-    const result = await response.json();
+    if (isNameValid && isEmailValid && isCnicValid && isPassValid && isConfirmValid) {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/auth/send-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            fullName: formData.fullName,
+            password: formData.password,
+            cnicNumber: formData.cnic,
+          }),
+        });
 
-    if (!response.ok) {
-      throw new Error(result.message || 'Server error');
+        const data = await response.json();
+        if (response.ok || data.success) {
+          // Store pending data in localStorage as fallback
+          localStorage.setItem('pendingEmail', formData.email);
+          localStorage.setItem('pendingName', formData.fullName);
+          localStorage.setItem('pendingCnic', formData.cnic);
+          setStep(2);
+        } else {
+          alert(data.message || 'Error sending OTP');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error. Failed to initiate signup.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleStep2Submit = async (e) => {
+    e.preventDefault();
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length !== 6) return;
+
+    setIsLoading(true);
+    setOtpError(false);
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          otp: enteredOtp,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok || data.success) {
+        setOtpSuccess(true);
+        setTimeout(() => {
+          setStep(3);
+        }, 1000);
+      } else {
+        setOtpError(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setOtpError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!canResendOtp) return;
+    setCanResendOtp(false);
+    setOtpTimer(90);
+    setOtp(['', '', '', '', '', '']);
+    setOtpError(false);
+
+    try {
+      await fetch(`${API_BASE}/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleStep3Submit = async (e) => {
+    e.preventDefault();
+    if (!formData.phone.trim()) {
+      setErrors(prev => ({ ...prev, phone: 'Phone number is required' }));
+      return;
+    }
+    if (!cnicFrontFile || !cnicBackFile) {
+      alert('Please upload both CNIC Front and CNIC Back images.');
+      return;
     }
 
-    // Save to localStorage for OTP and final completion step
-    const signupData = { fullName, email, password, cnic };
-    localStorage.setItem("signupData", JSON.stringify(signupData));
-    localStorage.setItem("pendingName", fullName);
-    localStorage.setItem("pendingEmail", email);
-    localStorage.setItem("pendingPassword", password);
-    localStorage.setItem("pendingCnic", cnic);
-    localStorage.setItem("step", "otp");
+    setIsProcessingFiles(true);
+    setOcrStatus(null);
 
-    alert('✅ Account details validated! Redirecting to verification...');
-    navigate("/otp");
-  } catch (error) {
-    console.error('Signup error:', error);
-    setErrors({ general: error.message || 'Something went wrong. Please try again.' });
-  } finally {
-    setIsLoading(false);
-  }
-};
+    // Create Form data to submit
+    const dataToSend = new FormData();
+    dataToSend.append('email', formData.email);
+    dataToSend.append('phone', formData.phone);
+    dataToSend.append('country', formData.country);
+    dataToSend.append('city', formData.city);
+    dataToSend.append('cnicFront', cnicFrontFile);
+    dataToSend.append('cnicBack', cnicBackFile);
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
-    // Implement social login logic later
+    try {
+      const response = await fetch(`${API_BASE}/auth/complete-info`, {
+        method: 'POST',
+        body: dataToSend
+      });
+
+      const result = await response.json();
+      if (response.ok || result.success) {
+        setOcrStatus('success');
+        setOcrMessage('Identity successfully verified by OCR!');
+        
+        // Save auth token if returned
+        if (result.token) {
+          localStorage.setItem('authToken', result.token);
+        }
+
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
+        setOcrStatus('error');
+        setOcrMessage(result.message || 'OCR validation failed. Ensure image is clear.');
+      }
+    } catch (err) {
+      console.error(err);
+      setOcrStatus('error');
+      setOcrMessage('Failed to connect to the server.');
+    } finally {
+      setIsProcessingFiles(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-purple-700 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
-        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
-          <div className="max-w-md text-center">
-            <h1 className="text-5xl font-bold mb-6">PakPorter</h1>
-            <p className="text-xl mb-8 text-blue-100">
-              Pakistan's Premier Delivery Network
-            </p>
-            <div className="space-y-4 text-left">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold">✓</span>
-                </div>
-                <span>Fast & Reliable Delivery</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold">✓</span>
-                </div>
-                <span>Real-time Tracking</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold">✓</span>
-                </div>
-                <span>Secure & Trusted</span>
-              </div>
+    <div className="min-h-screen bg-background flex flex-col pt-20">
+      <Navbar />
+
+      {/* Main card outer wrapper with slow animation */}
+      <div className="flex-1 flex items-center justify-center py-12 px-6 bg-gradient-to-br from-brandPrimary/5 via-background to-brandAccent/5">
+        <div className="w-full max-w-[480px] neo-flat p-8 md:p-10 relative overflow-hidden">
+          
+          {/* Stepper Progress Bar */}
+          <div className="mb-10">
+            <div className="flex justify-between items-center relative mb-4">
+              {/* Connecting line */}
+              <div className="absolute top-1/2 left-0 w-full h-[3px] bg-cardBase -translate-y-1/2 z-0" />
+              <motion.div 
+                className="absolute top-1/2 left-0 h-[3px] bg-brandPrimary -translate-y-1/2 z-0 origin-left"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: (step - 1) / 2 }}
+                transition={{ duration: 0.4 }}
+                style={{ width: '100%' }}
+              />
+
+              {/* Step pills */}
+              {[1, 2, 3].map((num) => {
+                const isActive = step === num;
+                const isCompleted = step > num;
+                return (
+                  <div key={num} className="relative z-10">
+                    <motion.div 
+                      className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${
+                        isCompleted 
+                          ? 'bg-success text-white shadow-neo' 
+                          : isActive 
+                            ? 'bg-brandPrimary text-white shadow-neo' 
+                            : 'neo-pressed text-textSecondary'
+                      }`}
+                      animate={{ scale: isActive ? 1.15 : 1 }}
+                    >
+                      {isCompleted ? <Check className="w-4 h-4" /> : num}
+                    </motion.div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="flex justify-between text-xs font-bold text-textSecondary px-1">
+              <span>Basic Info</span>
+              <span>Verification</span>
+              <span>Complete Setup</span>
             </div>
           </div>
+
+          {/* Form Content steps */}
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.form 
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleStep1Submit}
+                className="space-y-6"
+              >
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-extrabold text-textPrimary">Join PakPorter</h2>
+                  <p className="text-sm text-textSecondary font-semibold">Step 1: Set up your travel details login</p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Full Name */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type="text" 
+                        placeholder="John Doe" 
+                        value={formData.fullName}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, fullName: e.target.value }));
+                          validateField('fullName', e.target.value);
+                        }}
+                        onBlur={() => handleBlur('fullName')}
+                        className="w-full pl-12 pr-10 py-3.5 neo-input"
+                      />
+                      {touched.fullName && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          {errors.fullName ? <AlertCircle className="w-5 h-5 text-error" /> : <Check className="w-5 h-5 text-success" />}
+                        </div>
+                      )}
+                    </div>
+                    {touched.fullName && errors.fullName && <p className="text-xs font-bold text-error">{errors.fullName}</p>}
+                  </div>
+
+                  {/* Email */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type="email" 
+                        placeholder="john@example.com" 
+                        value={formData.email}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, email: e.target.value }));
+                          validateField('email', e.target.value);
+                        }}
+                        onBlur={() => handleBlur('email')}
+                        className="w-full pl-12 pr-10 py-3.5 neo-input"
+                      />
+                      {touched.email && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          {errors.email ? <AlertCircle className="w-5 h-5 text-error" /> : <Check className="w-5 h-5 text-success" />}
+                        </div>
+                      )}
+                    </div>
+                    {touched.email && errors.email && <p className="text-xs font-bold text-error">{errors.email}</p>}
+                  </div>
+
+                  {/* CNIC Number */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">CNIC Number</label>
+                    <div className="relative">
+                      <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type="text" 
+                        placeholder="35201-1234567-1" 
+                        value={formData.cnic}
+                        onChange={handleCnicChange}
+                        onBlur={() => handleBlur('cnic')}
+                        className="w-full pl-12 pr-10 py-3.5 neo-input"
+                      />
+                      {touched.cnic && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          {errors.cnic ? <AlertCircle className="w-5 h-5 text-error" /> : <Check className="w-5 h-5 text-success" />}
+                        </div>
+                      )}
+                    </div>
+                    {touched.cnic && errors.cnic && <p className="text-xs font-bold text-error">{errors.cnic}</p>}
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type={showPassword ? 'text' : 'password'} 
+                        placeholder="••••••••" 
+                        value={formData.password}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, password: e.target.value }));
+                          validateField('password', e.target.value);
+                        }}
+                        onBlur={() => handleBlur('password')}
+                        className="w-full pl-12 pr-12 py-3.5 neo-input"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-textSecondary"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {touched.password && errors.password && <p className="text-xs font-bold text-error">{errors.password}</p>}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type={showConfirmPassword ? 'text' : 'password'} 
+                        placeholder="••••••••" 
+                        value={formData.confirmPassword}
+                        onChange={(e) => {
+                          setFormData(prev => ({ ...prev, confirmPassword: e.target.value }));
+                          validateField('confirmPassword', e.target.value);
+                        }}
+                        onBlur={() => handleBlur('confirmPassword')}
+                        className="w-full pl-12 pr-12 py-3.5 neo-input"
+                      />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-textSecondary"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                    {touched.confirmPassword && errors.confirmPassword && <p className="text-xs font-bold text-error">{errors.confirmPassword}</p>}
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full py-4 neo-button-brand font-bold text-base mt-2 flex items-center justify-center space-x-2"
+                >
+                  {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <span>Continue</span>}
+                </button>
+
+                <p className="text-center text-sm font-semibold text-textSecondary">
+                  Already have an account? <Link to="/login" className="text-brandPrimary hover:underline">Login</Link>
+                </p>
+              </motion.form>
+            )}
+
+            {step === 2 && (
+              <motion.form 
+                key="step2"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleStep2Submit}
+                className="space-y-6"
+              >
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-extrabold text-textPrimary">Verify Email</h2>
+                  <p className="text-sm text-textSecondary font-semibold">Enter the 6-digit OTP code sent to your email.</p>
+                </div>
+
+                {/* OTP input boxes */}
+                <div className="flex justify-between gap-2 max-w-[320px] mx-auto py-4">
+                  {otp.map((digit, idx) => (
+                    <motion.input
+                      key={idx}
+                      ref={el => otpInputsRef.current[idx] = el}
+                      type="text"
+                      maxLength="1"
+                      value={digit}
+                      onChange={(e) => handleOtpChange(idx, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                      className={`w-11 h-12 text-center text-xl font-bold neo-input border-2 ${
+                        otpError 
+                          ? 'border-error bg-error/5 animate-[shake_0.4s_ease-in-out]' 
+                          : otpSuccess 
+                            ? 'border-success bg-success/5 animate-[pulse_0.4s_ease]' 
+                            : 'border-transparent'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <div className="text-center space-y-4">
+                  <p className="text-sm font-semibold text-textSecondary">
+                    {formatTimer(otpTimer)}
+                  </p>
+                  
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={!canResendOtp}
+                    className={`text-sm font-bold flex items-center space-x-1 mx-auto ${
+                      canResendOtp 
+                        ? 'text-brandPrimary hover:underline' 
+                        : 'text-textSecondary opacity-50 cursor-not-allowed'
+                    }`}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Resend OTP</span>
+                  </button>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isLoading || otp.join('').length !== 6}
+                  className="w-full py-4 neo-button-brand font-bold text-base"
+                >
+                  {isLoading ? <RefreshCw className="w-5 h-5 animate-spin mx-auto" /> : <span>Verify OTP</span>}
+                </button>
+              </motion.form>
+            )}
+
+            {step === 3 && (
+              <motion.form 
+                key="step3"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                onSubmit={handleStep3Submit}
+                className="space-y-6"
+              >
+                <div className="space-y-2 text-center">
+                  <h2 className="text-3xl font-extrabold text-textPrimary">Complete Profile</h2>
+                  <p className="text-sm text-textSecondary font-semibold">Upload your identity proof to start verifying.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Phone Number */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Phone Number</label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type="text" 
+                        placeholder="+92 300 1234567" 
+                        value={formData.phone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                        onBlur={() => handleBlur('phone')}
+                        className="w-full pl-12 pr-4 py-3.5 neo-input"
+                      />
+                    </div>
+                    {errors.phone && <p className="text-xs font-bold text-error">{errors.phone}</p>}
+                  </div>
+
+                  {/* City Select */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">City</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <select 
+                        value={formData.city}
+                        onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                        className="w-full pl-12 pr-4 py-3.5 neo-input appearance-none"
+                      >
+                        <option value="Lahore">Lahore</option>
+                        <option value="Karachi">Karachi</option>
+                        <option value="Islamabad">Islamabad</option>
+                        <option value="Rawalpindi">Rawalpindi</option>
+                        <option value="Faisalabad">Faisalabad</option>
+                        <option value="Multan">Multan</option>
+                        <option value="Peshawar">Peshawar</option>
+                        <option value="Quetta">Quetta</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Country Select (Auto Filled Pakistan) */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Country</label>
+                    <div className="relative">
+                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-textSecondary" />
+                      <input 
+                        type="text" 
+                        value={formData.country} 
+                        disabled 
+                        className="w-full pl-12 pr-4 py-3.5 neo-input opacity-70 cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  {/* CNIC Upload Section */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-textSecondary uppercase tracking-wider block mb-2">Upload CNIC Proof</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* CNIC Front */}
+                      <label className="neo-pressed p-4 flex flex-col items-center justify-center text-center cursor-pointer aspect-video relative overflow-hidden group">
+                        {previews.front ? (
+                          <>
+                            <img src={previews.front} alt="CNIC Front" className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Upload className="w-6 h-6 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-5 h-5 text-textSecondary mb-1" />
+                            <span className="text-[10px] font-bold text-textSecondary uppercase">CNIC Front</span>
+                          </>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 'front')} />
+                      </label>
+
+                      {/* CNIC Back */}
+                      <label className="neo-pressed p-4 flex flex-col items-center justify-center text-center cursor-pointer aspect-video relative overflow-hidden group">
+                        {previews.back ? (
+                          <>
+                            <img src={previews.back} alt="CNIC Back" className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Upload className="w-6 h-6 text-white" />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-5 h-5 text-textSecondary mb-1" />
+                            <span className="text-[10px] font-bold text-textSecondary uppercase">CNIC Back</span>
+                          </>
+                        )}
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, 'back')} />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* File Upload Processing Anim & Status result */}
+                {isProcessingFiles && (
+                  <div className="neo-pressed p-4 flex items-center justify-center space-x-3 text-brandPrimary">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Processing OCR Verification...</span>
+                  </div>
+                )}
+
+                {ocrStatus && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`neo-flat p-4 flex items-start space-x-3 ${ocrStatus === 'success' ? 'bg-success/5 text-success' : 'bg-error/5 text-error'}`}
+                  >
+                    {ocrStatus === 'success' ? <Check className="w-5 h-5 flex-shrink-0 mt-0.5" /> : <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />}
+                    <div className="text-xs font-semibold">
+                      <span className="font-extrabold uppercase tracking-wide block">
+                        {ocrStatus === 'success' ? 'Verification Success' : 'Verification Failed'}
+                      </span>
+                      <p className="mt-0.5">{ocrMessage}</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                <button 
+                  type="submit" 
+                  disabled={isProcessingFiles || isLoading}
+                  className="w-full py-4 neo-button-brand font-bold text-base"
+                >
+                  Complete Setup
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="absolute top-20 right-20 w-32 h-32 bg-white bg-opacity-10 rounded-full"></div>
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-white bg-opacity-10 rounded-full"></div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">PakPorter</h1>
-            <p className="text-gray-600">Join Pakistan's Premier Delivery Network</p>
-          </div>
-
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
-            <p className="text-gray-600">Enter your details to get started</p>
-          </div>
-
-          {errors.general && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              <span className="text-red-700 text-sm">{errors.general}</span>
-            </div>
-          )}
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  autoFocus
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.fullName ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Enter your full name"
-                />
-              </div>
-              {errors.fullName && (
-                <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Enter your email address"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                CNIC Number *
-              </label>
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={formData.cnic}
-                  onChange={handleCNICChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-mono ${errors.cnic ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="00000-0000000-0"
-                />
-              </div>
-              {errors.cnic && (
-                <p className="mt-1 text-sm text-red-600">{errors.cnic}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password *
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Create a strong password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
-              )}
-            </div>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={isLoading}
-            className={`w-full mt-8 py-3 px-4 rounded-lg font-medium text-white transition-all duration-200 ${isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
-              }`}
-          >
-            {isLoading ? 'Validating...' : 'Create Account'}
-          </button>
-
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleSocialLogin('Google')}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                </svg>
-                Google
-              </button>
-
-              <button
-                onClick={() => handleSocialLogin('Facebook')}
-                className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                <svg className="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-                Facebook
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
-                Sign in
-              </Link>
-            </p>
-          </div>
-
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              By creating an account, you agree to our{' '}
-              <button className="text-blue-600 hover:underline">Terms of Service</button>
-              {' '}and{' '}
-              <button className="text-blue-600 hover:underline">Privacy Policy</button>
-            </p>
-          </div>
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 };
 
-export default AccountDetailsPage;
+export default Signup;

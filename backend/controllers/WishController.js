@@ -52,7 +52,7 @@ const createWish = asyncHandler(async (req, res) => {
     description,
     basePrice: parseFloat(basePrice),
     deliveryDeadline: deadlineDate,
-    productLink: productLink || undefined,
+    productLink: (productLink && /^https?:\/\/.+/.test(productLink)) ? productLink : undefined,
     images,
     location,
     createdBy: req.user._id,
