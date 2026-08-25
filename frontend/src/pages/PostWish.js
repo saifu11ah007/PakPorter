@@ -1,10 +1,15 @@
-// PostWish.js – Updated to submit wish to backend and include required fields
+// PostWish.js – Updated with real URL scraper, preview card, and auto-fill
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { Upload, Plus, Minus, Link as LinkIcon, Check, Loader2, Sparkles, ShoppingBag } from 'lucide-react';
+import {
+  Upload, Plus, Minus, Link as LinkIcon, Check, Loader2,
+  Sparkles, ShoppingBag, ExternalLink, X, AlertCircle, Image as ImageIcon
+} from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 // Helper component for animating matching travellers
 const TravelerCounter = ({ value }) => {
@@ -35,6 +40,130 @@ const TravelerCounter = ({ value }) => {
   return <span ref={ref}>{Math.round(count)}</span>;
 };
 
+// ─── Toast notification component ─────────────────────────────────────────────
+
+const Toast = ({ message, type = 'warning', onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      className="fixed top-6 right-6 z-50 max-w-sm"
+    >
+      <div className={`neo-flat p-4 flex items-start space-x-3 ${
+        type === 'error' ? 'border-l-4 border-error' :
+        type === 'success' ? 'border-l-4 border-success' :
+        'border-l-4 border-warning'
+      }`}>
+        <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+          type === 'error' ? 'text-error' :
+          type === 'success' ? 'text-success' :
+          'text-warning'
+        }`} />
+        <p className="text-sm font-semibold text-textPrimary leading-relaxed flex-1">{message}</p>
+        <button onClick={onClose} className="text-textSecondary hover:text-textPrimary flex-shrink-0">
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── Preview card component ──────────────────────────────────────────────────
+
+const ProductPreviewCard = ({ product, pkrPrice, onAccept, onDismiss }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.97 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="neo-flat p-5 space-y-4 mt-3"
+    >
+      {/* Header */}
+      <div className="flex items-center space-x-2 pb-2 border-b border-cardBase">
+        <Sparkles className="w-4 h-4 text-brandPrimary" />
+        <span className="text-xs font-extrabold text-brandPrimary uppercase tracking-wider">Product Found</span>
+      </div>
+
+      {/* Content row */}
+      <div className="flex gap-4">
+        {/* Image */}
+        {product.imageUrl && (
+          <div className="w-24 h-24 flex-shrink-0 neo-pressed rounded-xl overflow-hidden">
+            <img
+              src={product.imageUrl}
+              alt={product.productName}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentNode.innerHTML = '<div class="w-full h-full flex items-center justify-center text-textSecondary"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>';
+              }}
+            />
+          </div>
+        )}
+
+        {/* Details */}
+        <div className="flex-1 min-w-0 space-y-2">
+          <h4 className="font-bold text-textPrimary text-sm leading-snug line-clamp-2">
+            {product.productName}
+          </h4>
+
+          {product.siteName && (
+            <div className="flex items-center space-x-1.5 text-xs font-semibold text-textSecondary">
+              <ExternalLink className="w-3 h-3" />
+              <span>{product.siteName}</span>
+            </div>
+          )}
+
+          {product.price && (
+            <div className="space-y-0.5">
+              <span className="text-sm font-extrabold text-brandPrimary">
+                {product.currency ? `${product.currency} ` : ''}{parseFloat(product.price).toLocaleString()}
+              </span>
+              {pkrPrice && (
+                <span className="text-xs font-semibold text-textSecondary ml-2">
+                  ≈ PKR {Math.round(pkrPrice).toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
+
+          {product.description && (
+            <p className="text-xs font-semibold text-textSecondary leading-relaxed line-clamp-2">
+              {product.description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-3 pt-1">
+        <button
+          onClick={onAccept}
+          className="flex-1 py-3 neo-button-brand font-bold text-xs flex items-center justify-center space-x-2"
+        >
+          <Check className="w-4 h-4" />
+          <span>Looks Good</span>
+        </button>
+        <button
+          onClick={onDismiss}
+          className="flex-1 py-3 neo-button-outline font-bold text-xs text-brandPrimary"
+        >
+          Fill Manually
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── Main PostWish component ─────────────────────────────────────────────────
+
 const PostWish = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -42,6 +171,7 @@ const PostWish = () => {
   // Step 1 states
   const [photos, setPhotos] = useState([]); // preview URLs
   const [uploadedFiles, setUploadedFiles] = useState([]); // actual File objects
+  const [scrapedImageUrl, setScrapedImageUrl] = useState(null); // scraped image URL (not a File)
   const [productName, setProductName] = useState('');
   const [category, setCategory] = useState('Electronics 💻');
   const [desiredCountry, setDesiredCountry] = useState('UAE 🇦🇪');
@@ -51,6 +181,12 @@ const PostWish = () => {
   const [basePrice, setBasePrice] = useState('');
   const [deliveryDeadline, setDeliveryDeadline] = useState('');
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+
+  // Scraper preview states
+  const [fetchedProduct, setFetchedProduct] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [pkrPrice, setPkrPrice] = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Step 2 states (address selection)
   const [savedAddresses, setSavedAddresses] = useState([
@@ -68,17 +204,128 @@ const PostWish = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock URL Scraper autofill
-  const handleFetchDetails = () => {
-    if (!productUrl) return;
-    setIsFetchingUrl(true);
-    setTimeout(() => {
-      setIsFetchingUrl(false);
-      setProductName('iPhone 15 Pro Max (256GB, Natural Titanium)');
-      setDescription('Original unlocked Apple iPhone 15 Pro Max with standard Apple global warranty. Box must be sealed.');
-      setCategory('Electronics 💻');
-    }, 1500);
+  // ─── URL Scraper — Real Implementation ──────────────────────────────────
+
+  const convertToPKR = async (price, currency) => {
+    if (!price || !currency || currency === 'PKR') {
+      return currency === 'PKR' ? parseFloat(price) : null;
+    }
+    try {
+      const res = await fetch(`https://api.exchangerate-api.com/v4/latest/${currency}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const rate = data.rates?.PKR;
+      if (rate) return parseFloat(price) * rate;
+    } catch {
+      // Silently fail — PKR price is optional
+    }
+    return null;
   };
+
+  const handleFetchDetails = async () => {
+    if (!productUrl) return;
+
+    // Client-side HTTPS check
+    if (!productUrl.startsWith('https://')) {
+      setToast({ message: 'Please enter a valid HTTPS URL (starting with https://).', type: 'warning' });
+      return;
+    }
+
+    setIsFetchingUrl(true);
+    setShowPreview(false);
+    setFetchedProduct(null);
+    setPkrPrice(null);
+
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      if (!token) {
+        setToast({ message: 'Please log in to use the autofill feature.', type: 'error' });
+        setIsFetchingUrl(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/scraper/fetch-product`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ url: productUrl }),
+      });
+
+      const result = await response.json();
+
+      if (response.status === 429) {
+        setToast({ message: result.message || 'Too many requests. Please wait a moment.', type: 'warning' });
+        setIsFetchingUrl(false);
+        return;
+      }
+
+      if (!result.success) {
+        setToast({
+          message: "We couldn't fetch details from this link. You can still save the URL and fill in details manually.",
+          type: 'warning'
+        });
+        setIsFetchingUrl(false);
+        return;
+      }
+
+      // Fetch PKR conversion if price is available
+      let convertedPkr = null;
+      if (result.data.price && result.data.currency) {
+        convertedPkr = await convertToPKR(result.data.price, result.data.currency);
+      }
+
+      setFetchedProduct(result.data);
+      setPkrPrice(convertedPkr);
+      setShowPreview(true);
+
+    } catch (err) {
+      console.error('Fetch product error:', err);
+      setToast({
+        message: "We couldn't fetch details from this link. You can still save the URL and fill in details manually.",
+        type: 'warning'
+      });
+    } finally {
+      setIsFetchingUrl(false);
+    }
+  };
+
+  // ─── Preview card actions ───────────────────────────────────────────────
+
+  const handleAcceptPreview = () => {
+    if (!fetchedProduct) return;
+
+    // Auto-fill form fields
+    if (fetchedProduct.productName) setProductName(fetchedProduct.productName.slice(0, 80));
+    if (fetchedProduct.description) setDescription(fetchedProduct.description);
+
+    // Add scraped image as first preview (URL-only, not a File)
+    if (fetchedProduct.imageUrl) {
+      setScrapedImageUrl(fetchedProduct.imageUrl);
+      // Prepend the scraped image URL to the photos array if not already present
+      setPhotos((prev) => {
+        if (prev.includes(fetchedProduct.imageUrl)) return prev;
+        return [fetchedProduct.imageUrl, ...prev].slice(0, 5);
+      });
+    }
+
+    // If PKR price is available, suggest it as base price
+    if (pkrPrice) {
+      setBasePrice(Math.round(pkrPrice).toString());
+    }
+
+    setShowPreview(false);
+    setFetchedProduct(null);
+  };
+
+  const handleDismissPreview = () => {
+    setShowPreview(false);
+    setFetchedProduct(null);
+    setPkrPrice(null);
+  };
+
+  // ─── File upload handlers ───────────────────────────────────────────────
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -92,8 +339,20 @@ const PostWish = () => {
   };
 
   const removePhoto = (index) => {
+    const removedUrl = photos[index];
     setPhotos((prev) => prev.filter((_, idx) => idx !== index));
-    setUploadedFiles((prev) => prev.filter((_, idx) => idx !== index));
+
+    // If the removed photo is the scraped image URL, clear it
+    if (removedUrl === scrapedImageUrl) {
+      setScrapedImageUrl(null);
+    } else {
+      // Find the corresponding index in uploadedFiles
+      // Scraped image occupies slot 0 if present, so offset accordingly
+      const fileIndex = scrapedImageUrl ? index - 1 : index;
+      if (fileIndex >= 0) {
+        setUploadedFiles((prev) => prev.filter((_, idx) => idx !== fileIndex));
+      }
+    }
   };
 
   const handleAddNewAddress = (e) => {
@@ -121,6 +380,12 @@ const PostWish = () => {
     if (productUrl && /^https?:\/\/.+/.test(productUrl)) form.append('productLink', productUrl);
     form.append('location[country]', locationCountry);
     form.append('location[city]', locationCity);
+
+    // If we have a scraped image URL, pass it as an imageUrl
+    if (scrapedImageUrl) {
+      form.append('imageUrls', scrapedImageUrl);
+    }
+
     uploadedFiles.forEach((file) => form.append('images', file));
 
     setIsLoading(true);
@@ -131,7 +396,7 @@ const PostWish = () => {
         setIsLoading(false);
         return;
       }
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/wish`, {
+      const response = await fetch(`${API_BASE}/wish`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -153,11 +418,22 @@ const PostWish = () => {
     }
   };
 
-  // Mock URL fetch button stays as before
-
   return (
     <div className="min-h-screen bg-background flex flex-col pt-20">
       <Navbar />
+
+      {/* Toast notifications */}
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            key="toast"
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="flex-1 flex items-center justify-center py-12 px-6 bg-gradient-to-br from-brandPrimary/5 via-background to-brandAccent/5">
         <AnimatePresence mode="wait">
           {!showSuccess ? (
@@ -230,6 +506,12 @@ const PostWish = () => {
                         {photos.map((url, idx) => (
                           <div key={idx} className="relative aspect-square rounded-xl neo-flat overflow-hidden group">
                             <img src={url} alt="Upload preview" className="w-full h-full object-cover" />
+                            {/* Show a small badge on scraped images */}
+                            {url === scrapedImageUrl && (
+                              <div className="absolute top-1 left-1 px-1.5 py-0.5 rounded-md bg-brandPrimary/90 text-white text-[8px] font-extrabold uppercase">
+                                Auto
+                              </div>
+                            )}
                             <button
                               onClick={() => removePhoto(idx)}
                               className="absolute inset-0 bg-error/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold"
@@ -247,6 +529,7 @@ const PostWish = () => {
                         )}
                       </div>
                     </div>
+
                     {/* Product URL scraper */}
                     <div className="space-y-1">
                       <label className="text-xs font-bold text-textSecondary uppercase tracking-wider">Import from Product Link</label>
@@ -265,12 +548,33 @@ const PostWish = () => {
                           type="button"
                           onClick={handleFetchDetails}
                           disabled={isFetchingUrl || !productUrl}
-                          className="px-5 neo-button-brand font-bold text-sm flex items-center space-x-2"
+                          className="px-5 neo-button-brand font-bold text-sm flex items-center space-x-2 disabled:opacity-50"
                         >
-                          {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Autofill</span>}
+                          {isFetchingUrl ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4" />
+                              <span>Autofill</span>
+                            </>
+                          )}
                         </button>
                       </div>
+
+                      {/* Preview card (rendered inline below the URL field) */}
+                      <AnimatePresence>
+                        {showPreview && fetchedProduct && (
+                          <ProductPreviewCard
+                            key="preview"
+                            product={fetchedProduct}
+                            pkrPrice={pkrPrice}
+                            onAccept={handleAcceptPreview}
+                            onDismiss={handleDismissPreview}
+                          />
+                        )}
+                      </AnimatePresence>
                     </div>
+
                     {/* Product Name & Category */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-1">
