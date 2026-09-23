@@ -19,6 +19,7 @@ import PostWish from './pages/PostWish';
 import Browse from './pages/Browse';
 import Trips from './pages/Trips';
 import Profile from './pages/Profile';
+import Policies from './pages/Policies';
 
 // Redirect logged-in users away from login/signup
 const RedirectIfLoggedIn = ({ children }) => {
@@ -56,6 +57,20 @@ function App() {
 
           <Route path="/wish/:id" element={<WishDetailPage />} />
           <Route path="/bid/:id" element={<BidForm />} />
+
+          {/* Compliance & Policy Pages (Safepay requirements) */}
+          <Route path="/privacy-policy" element={<Policies defaultTab="privacy" />} />
+          <Route path="/privacy" element={<Policies defaultTab="privacy" />} />
+          <Route path="/terms-and-conditions" element={<Policies defaultTab="terms" />} />
+          <Route path="/terms" element={<Policies defaultTab="terms" />} />
+          <Route path="/refund-policy" element={<Policies defaultTab="refunds" />} />
+          <Route path="/cancellation-refund-policy" element={<Policies defaultTab="refunds" />} />
+          <Route path="/cancellation-policy" element={<Policies defaultTab="refunds" />} />
+          <Route path="/return-policy" element={<Policies defaultTab="refunds" />} />
+          <Route path="/ownership-statement" element={<Policies defaultTab="ownership" />} />
+          <Route path="/about-us" element={<Policies defaultTab="ownership" />} />
+          <Route path="/policies" element={<Policies defaultTab="privacy" />} />
+          <Route path="/legal" element={<Policies defaultTab="privacy" />} />
           
           <Route
             path="/login"
