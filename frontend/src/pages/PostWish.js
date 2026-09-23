@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   Upload, Plus, Minus, Link as LinkIcon, Check, Loader2,
-  Sparkles, ShoppingBag, ExternalLink, X, AlertCircle, Image as ImageIcon
+  Sparkles, ShoppingBag, ExternalLink, X, AlertCircle
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
