@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import PageLoader from '../components/PageLoader';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 

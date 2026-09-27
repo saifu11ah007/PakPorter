@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Home, ShoppingBag, Map, MessageSquare, CreditCard, User, Settings, Calendar, ArrowRight, CheckCircle, Navigation, ChevronDown, ChevronUp, LogOut, Package } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import PageLoader from '../components/PageLoader';
 
 const Trips = () => {
   const navigate = useNavigate();
