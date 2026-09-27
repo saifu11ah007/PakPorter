@@ -2334,24 +2334,55 @@ function StoryDialog({ story, onClose }) {
 init_assets();
 
 var css = `
+.orbit-delivery.only-orbit {
+  background: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 440px !important;
+  position: relative !important;
+  overflow: visible !important;
+}
 .orbit-delivery.only-orbit .site-header,
 .orbit-delivery.only-orbit .hero-copy,
 .orbit-delivery.only-orbit .site-footer {
   display: none !important;
 }
+.orbit-delivery.only-orbit .page {
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  min-height: auto !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+.orbit-delivery.only-orbit .hero {
+  min-height: 440px !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 .orbit-delivery.only-orbit .visual-column {
   position: relative !important;
   right: auto !important;
   left: auto !important;
+  top: auto !important;
   width: 100% !important;
-  height: clamp(500px, 80vh, 900px) !important;
+  height: 100% !important;
+  min-height: 440px !important;
   margin: 0 auto !important;
 }
-.orbit-delivery.only-orbit .hero {
-  min-height: clamp(500px, 80vh, 900px) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.orbit-delivery.only-orbit .planet-stage {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 440px !important;
+}
+.orbit-delivery.only-orbit .cloud-bank {
+  opacity: 0.5 !important;
 }
 @font-face{font-family:'Orbit DM Sans';font-style:normal;font-weight:400 700;font-display:swap;src:url('https://cdn.21st.dev/assets/mirror/46/468d56b6b25b05b70190b6c233d773f6f1770e8579827ce022a57f03fa8002fb.woff2') format('woff2')}
 
