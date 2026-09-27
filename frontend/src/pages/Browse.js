@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Sliders, ShoppingBag, Package, Plane, Lock, Eye } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PageLoader from '../components/PageLoader';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -62,20 +63,7 @@ const Browse = () => {
 
   // If still checking, show loading
   if (isTraveller === null) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col pt-20">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="w-12 h-12 rounded-full neo-pressed flex items-center justify-center mx-auto animate-pulse">
-              <Plane className="w-6 h-6 text-brandPrimary" />
-            </div>
-            <p className="text-sm font-bold text-textSecondary">Checking traveller status...</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // If not a verified traveller, show gate

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, Star, ArrowRight, ShoppingBag, ChevronRight, Gift, User, Plane } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PageLoader from '../components/PageLoader';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -76,6 +77,8 @@ const Profile = () => {
   const reviews = [
     { id: 1, stars: 5, quote: "Excellent wisher. Fast payment through Escrow escrow verification.", author: "Traveller Sarah", date: "June 20, 2026" }
   ];
+
+  if (!userProfile) return <PageLoader />;
 
   return (
     <div className="min-h-screen bg-background flex flex-col pt-20">

@@ -1,27 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  MapPin, 
-  User, 
-  Heart,
-  Share2,
-  Eye,
-  Package,
-  ChevronRight,
-  X,
-  ZoomIn,
-  Shield,
-  Truck,
-  MessageCircle,
-  AlertCircle,
-  CheckCircle,
-  ExternalLink
-} from 'lucide-react';
-import {jwtDecode} from 'jwt-decode'; // Requires: npm install jwt-decode
+import { jwtDecode } from 'jwt-decode';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import PageLoader from '../components/PageLoader';
 
 const getWishIdFromUrl = () => {
   const pathParts = window.location.pathname.split('/');
@@ -39,16 +21,12 @@ const useAuth = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    console.log('useAuth: authToken from localStorage:', token ? 'Present' : 'Missing'); // Debug token
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        const userData = { id: decoded._id, name: decoded.name || 'Current User', token };
-        console.log('useAuth: Setting user:', userData); // Debug user data
-        setUser(userData);
+        setUser({ id: decoded._id, name: decoded.name || 'Current User', token });
         setIsAuthenticated(true);
       } catch (err) {
-        console.error('useAuth: Token decode error:', err.message);
         localStorage.removeItem('authToken');
       }
     }
@@ -58,59 +36,36 @@ const useAuth = () => {
   return { user, isAuthenticated, loading };
 };
 
-const WishDetailSkeleton = () => (
-  <div className="animate-pulse">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-      <div className="bg-gray-200 aspect-square rounded-xl"></div>
-      <div className="space-y-4">
-        <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-        <div className="space-y-2">
-          <div className="h-4 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded"></div>
-          <div className="h-4 bg-gray-200 rounded w-4/5"></div>
-        </div>
-        <div className="h-12 bg-gray-200 rounded"></div>
-      </div>
-    </div>
-  </div>
-);
-
 const ImageGallery = ({ images }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
 
   if (!images || images.length === 0) {
     return (
-      <div className="aspect-square bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-          <p className="text-gray-500">No image available</p>
+      <div className="aspect-square neo-pressed rounded-2xl flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <svg className="w-12 h-12 text-textSecondary mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+          <p className="text-xs font-semibold text-textSecondary">No image available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="relative group">
-        <div className="aspect-square bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+        <div className="aspect-square neo-pressed rounded-2xl overflow-hidden">
           <img
             src={images[selectedImage]}
             alt="Wish product"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover cursor-zoom-in"
+            onClick={() => setShowZoom(true)}
             onError={(e) => {
-              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTAwQzE2Ni42NjcgMTAwIDEzMy4zMzMgMTAwIDEwMCAxMDBWMzAwSDE2Ni42NjdIMjMzLjMzM0gzMDBWMTAwQzI2Ni66NjY3MTAwIDIzMy4zMzMgMTAwIDIwMCAxMDBaIiBmaWxsPSIjRTVFN0VCIi8+Cjwvc3ZnPgo=';
+              e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+Cjwvc3ZnPg==';
             }}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
-            <button
-              onClick={() => setShowZoom(true)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-full p-2 shadow-lg"
-            >
-              <ZoomIn className="w-5 h-5 text-gray-700" />
-            </button>
-          </div>
         </div>
       </div>
       {images.length > 1 && (
@@ -119,35 +74,37 @@ const ImageGallery = ({ images }) => {
             <button
               key={index}
               onClick={() => setSelectedImage(index)}
-              className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+              className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
+                selectedImage === index ? 'neo-pressed' : 'neo-flat'
               }`}
             >
               <img
                 src={image}
                 alt={`Product ${index + 1}`}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0zMiAxNkMyNi42NjY3IDE2IDIxLjMzMzMgMTYgMTYgMTZWNDhIMjYuNjY2N0gzNy4zMzMzSDQ4VjE2QzQyLjY2NjcgMTYgMzcuMzMzMyAxNiAzMiAxNloiIGZpbGw9IiNFNUU3RUIiLz4KPC9zdmc+Cg==';
-                }}
               />
             </button>
           ))}
         </div>
       )}
       {showZoom && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowZoom(false)}
+        >
           <div className="relative max-w-4xl max-h-full">
             <button
               onClick={() => setShowZoom(false)}
-              className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg z-10"
+              className="absolute top-3 right-3 w-9 h-9 rounded-full neo-flat flex items-center justify-center text-textPrimary z-10"
             >
-              <X className="w-6 h-6" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
             <img
               src={images[selectedImage]}
               alt="Zoomed product"
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl"
             />
           </div>
         </div>
@@ -161,8 +118,6 @@ const WishDetailPage = () => {
   const [wish, setWish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stickyHeader, setStickyHeader] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const navigate = useNavigate();
   const wishId = getWishIdFromUrl();
 
@@ -172,10 +127,7 @@ const WishDetailPage = () => {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching wish with ID:', wishId); // Line 166
         const token = localStorage.getItem('authToken');
-        console.log('fetchWishDetails: authToken:', token ? 'Present' : 'Missing'); // Debug token
-
         const response = await fetch(`${process.env.REACT_APP_API_URL}/wish/${wishId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -184,12 +136,9 @@ const WishDetailPage = () => {
 
         if (!response.ok) {
           const errorData = await response.json();
-          if (response.status === 404) {
-            throw new Error('Wish not found');
-          } else if (response.status === 400) {
-            throw new Error('Invalid wish ID');
-          } else if (response.status === 401) {
-            console.log('fetchWishDetails: Unauthorized, clearing authToken');
+          if (response.status === 404) throw new Error('Wish not found');
+          else if (response.status === 400) throw new Error('Invalid wish ID');
+          else if (response.status === 401) {
             localStorage.removeItem('authToken');
             throw new Error('Please log in to view this wish');
           } else {
@@ -198,10 +147,8 @@ const WishDetailPage = () => {
         }
 
         const wishData = await response.json();
-        console.log('Wish data:', wishData); // Line 186
         setWish(wishData);
       } catch (err) {
-        console.error('fetchWishDetails: Error:', err.message);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -214,87 +161,79 @@ const WishDetailPage = () => {
       setLoading(false);
       setError('Invalid wish ID');
     }
-
-    const handleScroll = () => {
-      setStickyHeader(window.scrollY > 200);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [wishId, navigate]);
+  }, [wishId]);
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: wish?.title,
-        text: wish?.description,
-        url: window.location.href,
-      });
+      navigator.share({ title: wish?.title, text: wish?.description, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    // In real app, you would save this to user's bookmarks
-  };
-
   const handlePlaceBid = () => {
-    console.log('handlePlaceBid: Navigating to bid form with wishId:', wish._id); // Line 234
     if (!user?.token) {
-      console.log('handlePlaceBid: No token, redirecting to login');
       navigate('/login');
       return;
     }
     navigate(`/bid/${wish._id}`);
   };
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <WishDetailSkeleton />
-        </div>
-      </div>
-    );
-  }
+  if (authLoading || loading) return <PageLoader />;
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops! Something went wrong</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-            <button
-              onClick={() => window.history.back()}
-              className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Go Back
-            </button>
+      <div className="min-h-screen bg-background flex flex-col pt-20">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="w-full max-w-md neo-flat p-10 text-center space-y-6">
+            <div className="w-16 h-16 rounded-2xl neo-pressed flex items-center justify-center mx-auto text-error">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-extrabold text-textPrimary">Something went wrong</h2>
+              <p className="text-sm font-semibold text-textSecondary">{error}</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => window.location.reload()}
+                className="flex-1 py-3 neo-button-brand font-bold text-sm"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="flex-1 py-3 neo-button-outline font-bold text-sm text-brandPrimary"
+              >
+                Go Back
+              </button>
+            </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   if (!wish) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Wish Not Found</h2>
-          <p className="text-gray-600">The wish you're looking for doesn't exist or has been removed.</p>
+      <div className="min-h-screen bg-background flex flex-col pt-20">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="w-full max-w-md neo-flat p-10 text-center space-y-4">
+            <div className="w-16 h-16 neo-pressed rounded-2xl flex items-center justify-center mx-auto text-textSecondary">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-extrabold text-textPrimary">Wish Not Found</h2>
+            <p className="text-sm font-semibold text-textSecondary">The wish you're looking for doesn't exist or has been removed.</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -304,250 +243,163 @@ const WishDetailPage = () => {
   const isExpired = new Date(wish.deliveryDeadline) < new Date();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className={`fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 transition-all duration-200 ${
-        stickyHeader ? 'translate-y-0 shadow-sm' : '-translate-y-full'
-      }`}>
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => window.history.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="font-semibold text-gray-900 truncate">{wish.title}</h1>
-          </div>
-          <div className="text-lg font-bold text-blue-600">
-            Rs. {wish.basePrice.toLocaleString()}
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background flex flex-col pt-20">
+      <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
-          <button 
-            onClick={() => window.location.href = '/'}
-            className="hover:text-gray-900"
-          >
-            Home
-          </button>
-          <ChevronRight className="w-4 h-4" />
-          <button 
-            onClick={() => window.location.href = '/wishes'}
-            className="hover:text-gray-900"
-          >
-            Wishes
-          </button>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900">Product Details</span>
+      <div className="max-w-6xl mx-auto px-6 py-10 w-full flex-1">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-xs font-bold text-textSecondary mb-6 uppercase tracking-wider">
+          <button onClick={() => window.location.href = '/'} className="hover:text-brandPrimary transition-colors">Home</button>
+          <span>/</span>
+          <button onClick={() => window.location.href = '/wishes'} className="hover:text-brandPrimary transition-colors">Wishes</button>
+          <span>/</span>
+          <span className="text-textPrimary">Product Details</span>
         </nav>
 
-        <button 
+        <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="flex items-center gap-2 text-sm font-bold text-textSecondary hover:text-brandPrimary mb-8 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
           Back to Wishes
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-10">
+          {/* Image Gallery */}
           <div>
             <ImageGallery images={wish.images} />
           </div>
 
+          {/* Details */}
           <div className="space-y-6">
-            <div>
-              <div className="flex items-start justify-between mb-3">
-                <h1 className="text-3xl font-bold text-gray-900 leading-tight">{wish.title}</h1>
-                <div className="flex items-center gap-2 ml-4">
-                  <button
-                    onClick={handleBookmark}
-                    className={`p-2 rounded-full transition-colors ${
-                      isBookmarked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    <Heart className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-                  </button>
-                  <button
-                    onClick={handleShare}
-                    className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-baseline gap-3 mb-4">
-                <div className="text-3xl font-bold text-blue-600">
-                  Rs. {wish.basePrice.toLocaleString()}
-                </div>
-                <div className="text-sm text-gray-500">Budget</div>
-              </div>
-
-              <div className="flex items-center gap-4 text-sm">
-                <div className={`flex items-center gap-1 ${isExpired ? 'text-red-600' : 'text-orange-600'}`}>
-                  <Clock className="w-4 h-4" />
-                  <span>
-                    {isExpired ? 'Expired' : `${daysLeft} days left`}
-                  </span>
-                </div>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  wish.isFulfilled 
-                    ? 'bg-green-100 text-green-800' 
-                    : isExpired 
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {wish.isFulfilled ? 'Fulfilled' : isExpired ? 'Expired' : 'Active'}
-                </div>
-              </div>
+            {/* Title + Share */}
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-3xl font-extrabold text-textPrimary leading-tight tracking-tight">{wish.title}</h1>
+              <button
+                onClick={handleShare}
+                className="p-2.5 rounded-xl neo-flat text-textSecondary hover:text-brandPrimary flex-shrink-0 transition-colors"
+                title="Share"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 text-gray-700">
-                <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="capitalize">
-                  {wish.location.city}, {wish.location.country}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-3 text-gray-700">
-                <Calendar className="w-5 h-5 text-gray-400" />
-                <span>
-                  Deadline: {new Date(wish.deliveryDeadline).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </span>
-              </div>
+            {/* Price + Status */}
+            <div className="flex items-center gap-4">
+              <span className="text-3xl font-extrabold text-brandPrimary">
+                PKR {wish.basePrice.toLocaleString()}
+              </span>
+              <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${
+                wish.isFulfilled
+                  ? 'bg-success/10 text-success'
+                  : isExpired
+                  ? 'bg-error/10 text-error'
+                  : 'bg-brandPrimary/10 text-brandPrimary'
+              }`}>
+                {wish.isFulfilled ? 'Fulfilled' : isExpired ? 'Expired' : 'Active'}
+              </span>
+              {!isExpired && !wish.isFulfilled && (
+                <span className="text-xs font-bold text-textSecondary">{daysLeft} days left</span>
+              )}
+            </div>
 
-              <div className="flex items-center gap-3 text-gray-700">
-                <User className="w-5 h-5 text-gray-400" />
+            {/* Meta info */}
+            <div className="neo-flat p-5 space-y-3">
+              <div className="flex items-center gap-3 text-sm font-semibold text-textSecondary">
+                <svg className="w-4 h-4 text-brandPrimary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="capitalize">{wish.location.city}, {wish.location.country}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm font-semibold text-textSecondary">
+                <svg className="w-4 h-4 text-brandPrimary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Deadline: {new Date(wish.deliveryDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm font-semibold text-textSecondary">
+                <svg className="w-4 h-4 text-brandPrimary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
                 <span>Posted by {wish.createdBy.fullName}</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <Clock className="w-5 h-5 text-gray-400" />
-                <span>
-                  Posted on {new Date(wish.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </span>
+              <div className="flex items-center gap-3 text-sm font-semibold text-textSecondary">
+                <svg className="w-4 h-4 text-brandPrimary flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Posted on {new Date(wish.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
             </div>
 
+            {/* Product Link */}
             {wish.productLink && (
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <ExternalLink className="w-4 h-4 text-blue-600" />
-                  <span className="font-medium text-blue-900">Reference Link</span>
-                </div>
+              <div className="neo-pressed p-4 rounded-2xl">
+                <span className="text-[10px] font-extrabold text-textSecondary uppercase tracking-wider block mb-1">Reference Link</span>
                 <a
                   href={wish.productLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm break-all"
+                  className="text-sm font-semibold text-brandPrimary hover:underline break-all"
                 >
                   {wish.productLink}
                 </a>
               </div>
             )}
 
+            {/* CTA */}
             <div className="space-y-3">
               {!isAuthenticated ? (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Shield className="w-5 h-5 text-yellow-600" />
-                    <span className="font-medium text-yellow-900">Login Required</span>
-                  </div>
-                  <p className="text-yellow-700 text-sm mb-3">
-                    Please log in to place a bid on this wish.
-                  </p>
+                <div className="neo-flat p-5 space-y-3">
+                  <p className="text-sm font-semibold text-textSecondary">Please log in to place a bid on this wish.</p>
                   <button
                     onClick={() => navigate('/login')}
-                    className="w-full bg-yellow-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
+                    className="w-full py-3.5 neo-button-brand font-bold text-sm"
                   >
                     Login to Bid
                   </button>
                 </div>
               ) : isOwner ? (
                 <div className="space-y-3">
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="font-medium text-green-900">This is your wish</span>
-                    </div>
-                    <p className="text-green-700 text-sm">
-                      You can view and manage bids received for this wish.
-                    </p>
+                  <div className="neo-pressed p-4 rounded-2xl">
+                    <span className="text-[10px] font-extrabold text-success uppercase tracking-wider block mb-1">Your Wish</span>
+                    <p className="text-xs font-semibold text-textSecondary">You can view and manage bids received for this wish.</p>
                   </div>
                   <button
                     onClick={() => navigate(`/wish/${wish._id}/bids`)}
-                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-3.5 neo-button-brand font-bold text-sm"
                     disabled={!wish._id}
                   >
-                    <Eye className="w-5 h-5" />
                     View All Bids
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={handlePlaceBid}
-                  disabled={isExpired || wish.isFulfilled || !wish._id || isOwner}
-                  className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  disabled={isExpired || wish.isFulfilled || !wish._id}
+                  className="w-full py-3.5 neo-button-brand font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <DollarSign className="w-5 h-5" />
-                  {isOwner
-                    ? 'Cannot Bid on Own Wish'
-                    : wish.isFulfilled
-                    ? 'Wish Fulfilled'
-                    : isExpired
-                    ? 'Bidding Closed'
-                    : 'Place Bid'}
+                  {wish.isFulfilled ? 'Wish Fulfilled' : isExpired ? 'Bidding Closed' : 'Place Bid'}
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Description</h3>
-          <div className="prose prose-gray max-w-none">
-            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {wish.description}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-            <Shield className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-            <h4 className="font-semibold text-gray-900 mb-2">Secure Payment</h4>
-            <p className="text-sm text-gray-600">
-              Payment is only released after you confirm delivery
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-            <Truck className="w-8 h-8 text-green-600 mx-auto mb-3" />
-            <h4 className="font-semibold text-gray-900 mb-2">Global Delivery</h4>
-            <p className="text-sm text-gray-600">
-              Trusted travelers bring items from anywhere in the world
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-            <MessageCircle className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-            <h4 className="font-semibold text-gray-900 mb-2">Direct Communication</h4>
-            <p className="text-sm text-gray-600">
-              Chat directly with travelers to discuss details
-            </p>
-          </div>
+        {/* Description */}
+        <div className="neo-flat p-8">
+          <h3 className="text-lg font-extrabold text-textPrimary mb-4 uppercase tracking-wider">Description</h3>
+          <p className="text-sm font-semibold text-textSecondary leading-relaxed whitespace-pre-wrap">
+            {wish.description}
+          </p>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
-import { Package, Shield, Sparkles, Navigation, Lock, MessageSquare, Gavel, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 // Helper component for animating stats counts
 const StatCounter = ({ value, label, prefix = "", suffix = "", decimals = 0 }) => {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = React.useState(0);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (inView) {
       let start = 0;
       const end = value;
-      const duration = 1500; // 1.5 seconds
+      const duration = 1500;
       const incrementTime = 30;
       const step = (end / (duration / incrementTime));
 
@@ -60,87 +59,6 @@ const AnimatedCheck = () => (
   </svg>
 );
 
-const testimonials = [
-  {
-    rating: 5,
-    quote: "Needed a dyson airwrap for my sister's wedding. Posted a wish on PakPorter and a traveller from UAE got it delivered in 4 days. Saved me PKR 30,000!",
-    name: "Ayesha Khan",
-    type: "Wisher",
-    city: "Lahore"
-  },
-  {
-    rating: 5,
-    quote: "Travelling back from the US once a year. Bringing laptops and gadgets on PakPorter helps me earn enough to cover my round-trip flight ticket!",
-    name: "Zain Ahmed",
-    type: "Traveller",
-    city: "Karachi"
-  },
-  {
-    rating: 5,
-    quote: "The escrow system made it completely stress-free. My payment was held secure until I physically verified my Nike sneakers.",
-    name: "Hamza Malik",
-    type: "Wisher",
-    city: "Islamabad"
-  }
-];
-
-const TestimonialCarousel = () => {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex(prev => (prev + 1) % testimonials.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleNext = () => {
-    setIndex(prev => (prev + 1) % testimonials.length);
-  };
-
-  const handlePrev = () => {
-    setIndex(prev => (prev - 1 + testimonials.length) % testimonials.length);
-  };
-
-  const current = testimonials[index];
-
-  return (
-    <div className="neo-flat p-8 md:p-12 relative flex flex-col items-center text-center space-y-6 max-w-2xl mx-auto">
-      <div className="flex space-x-1 justify-center">
-        {[...Array(current.rating)].map((_, i) => (
-          <Star key={i} className="w-5 h-5 text-warning fill-warning" />
-        ))}
-      </div>
-      <p className="text-lg md:text-xl font-medium text-textPrimary italic leading-relaxed">
-        "{current.quote}"
-      </p>
-      <div>
-        <h4 className="text-base font-bold text-textPrimary">{current.name}</h4>
-        <span className="text-xs font-bold text-brandPrimary uppercase tracking-wider">
-          {current.type} • {current.city}
-        </span>
-      </div>
-
-      <div className="flex space-x-4 pt-4">
-        <button
-          onClick={handlePrev}
-          className="p-3 rounded-xl neo-flat text-textSecondary hover:text-brandPrimary hover:scale-105 transition-all"
-          aria-label="Previous testimonial"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={handleNext}
-          className="p-3 rounded-xl neo-flat text-textSecondary hover:text-brandPrimary hover:scale-105 transition-all"
-          aria-label="Next testimonial"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const PakPorterHomepage = () => {
   const navigate = useNavigate();
 
@@ -172,8 +90,6 @@ const PakPorterHomepage = () => {
 
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 flex items-center justify-center">
-        {/* Infinite Shifting Hue Radial Gradient */}
-        <div className="absolute inset-0 animate-radial-gradient z-0 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -191,7 +107,7 @@ const PakPorterHomepage = () => {
                 >
                   Your Wish.<br />
                   Their Journey.<br />
-                  <span className="bg-gradient-to-r from-brandPrimary to-brandAccent bg-clip-text text-transparent">
+                  <span className="text-brandPrimary">
                     Delivered.
                   </span>
                 </motion.h1>
@@ -310,7 +226,9 @@ const PakPorterHomepage = () => {
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <div className="w-10 h-10 rounded-xl neo-pressed flex items-center justify-center text-brandPrimary">
-                    <Package className="w-5 h-5 animate-pulse" />
+                    <svg className="w-5 h-5 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
                   </div>
                   <div>
                     <span className="text-xs font-bold text-brandPrimary tracking-wider uppercase">Wish Posted</span>
@@ -355,12 +273,9 @@ const PakPorterHomepage = () => {
               {/* Step 1 */}
               <motion.div
                 className="neo-flat p-8 flex flex-col items-center text-center space-y-6"
-                whileHover={{ y: -6, boxShadow: "var(--neo-shadow-flat-hover)" }}
+                whileHover={{ y: -4 }}
               >
                 <div className="text-5xl font-black text-brandPrimary">01</div>
-                <div className="w-16 h-16 rounded-2xl neo-pressed flex items-center justify-center text-brandPrimary">
-                  <Sparkles className="w-8 h-8" />
-                </div>
                 <h3 className="text-xl font-bold text-textPrimary">Post Your Wish</h3>
                 <p className="text-sm text-textSecondary leading-relaxed">
                   Describe what item you need, which international store or country it's from, and set your reward.
@@ -370,12 +285,9 @@ const PakPorterHomepage = () => {
               {/* Step 2 */}
               <motion.div
                 className="neo-flat p-8 flex flex-col items-center text-center space-y-6"
-                whileHover={{ y: -6, boxShadow: "var(--neo-shadow-flat-hover)" }}
+                whileHover={{ y: -4 }}
               >
                 <div className="text-5xl font-black text-brandPrimary">02</div>
-                <div className="w-16 h-16 rounded-2xl neo-pressed flex items-center justify-center text-brandPrimary">
-                  <Navigation className="w-8 h-8" />
-                </div>
                 <h3 className="text-xl font-bold text-textPrimary">Traveller Makes Offers</h3>
                 <p className="text-sm text-textSecondary leading-relaxed">
                   Verified travellers heading your way place delivery bids. Choose the offer that fits your budget.
@@ -385,12 +297,9 @@ const PakPorterHomepage = () => {
               {/* Step 3 */}
               <motion.div
                 className="neo-flat p-8 flex flex-col items-center text-center space-y-6"
-                whileHover={{ y: -6, boxShadow: "var(--neo-shadow-flat-hover)" }}
+                whileHover={{ y: -4 }}
               >
                 <div className="text-5xl font-black text-brandPrimary">03</div>
-                <div className="w-16 h-16 rounded-2xl neo-pressed flex items-center justify-center text-brandPrimary">
-                  <Shield className="w-8 h-8" />
-                </div>
                 <h3 className="text-xl font-bold text-textPrimary">Pay Securely</h3>
                 <p className="text-sm text-textSecondary leading-relaxed">
                   Escrow holds your payment securely. The traveller gets paid only after you verify and accept delivery.
@@ -407,10 +316,9 @@ const PakPorterHomepage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* For Wishers Panel */}
             <motion.div
-              className="neo-flat p-10 md:p-12 space-y-8 relative overflow-hidden"
-              whileHover={{ y: -4, boxShadow: "var(--neo-shadow-flat-hover)" }}
+              className="neo-flat p-10 md:p-12 space-y-8"
+              whileHover={{ y: -4 }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brandPrimary/10 rounded-full blur-3xl pointer-events-none" />
               <div className="space-y-4">
                 <h3 className="text-3xl font-extrabold text-textPrimary">Want something from abroad?</h3>
                 <p className="text-textSecondary font-medium">Get international items brought home safely without shipping markup.</p>
@@ -445,10 +353,9 @@ const PakPorterHomepage = () => {
 
             {/* For Travellers Panel */}
             <motion.div
-              className="neo-flat p-10 md:p-12 space-y-8 relative overflow-hidden"
-              whileHover={{ y: -4, boxShadow: "var(--neo-shadow-flat-hover)" }}
+              className="neo-flat p-10 md:p-12 space-y-8"
+              whileHover={{ y: -4 }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-brandAccent/15 rounded-full blur-3xl pointer-events-none" />
               <div className="space-y-4">
                 <h3 className="text-3xl font-extrabold text-textPrimary">Travelling internationally?</h3>
                 <p className="text-textSecondary font-medium">Monetize your unused luggage space and subsidize your travel costs.</p>
@@ -511,8 +418,10 @@ const PakPorterHomepage = () => {
               { name: "Dyson Airwrap", country: "Germany", budget: 185000 }
             ]).map((wish, index) => (
               <div key={index} className="neo-flat flex-shrink-0 w-72 p-6 flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-xl neo-pressed flex items-center justify-center bg-brandPrimary/5">
-                  <Package className="w-5 h-5 text-brandPrimary" />
+                <div className="w-10 h-10 rounded-xl neo-pressed flex items-center justify-center">
+                  <svg className="w-5 h-5 text-brandPrimary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-bold text-textPrimary truncate">{wish.name}</h4>
@@ -528,65 +437,10 @@ const PakPorterHomepage = () => {
         </div>
       </section>
 
-      {/* Section 1.5: Trust and Safety */}
-      <section className="py-24 bg-background relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-extrabold text-textPrimary tracking-tight">
-              Built on Trust
-            </h2>
-            <div className="w-16 h-1 bg-gradient-to-r from-brandPrimary to-brandAccent mx-auto mt-3 rounded-full" />
-          </div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {[
-              { icon: <Shield className="w-6 h-6" />, title: "CNIC Verified Users", desc: "All local users undergo real-time CNIC validation before transaction access." },
-              { icon: <Lock className="w-6 h-6" />, title: "Escrow Payment Protection", desc: "Payments are held securely in escrow until delivery is confirmed by you." },
-              { icon: <MessageSquare className="w-6 h-6" />, title: "Real-time Chat", desc: "Discuss product specs, luggage room, and receipts securely in-app." },
-              { icon: <Gavel className="w-6 h-6" />, title: "Dispute Resolution", desc: "Dedicated support team processes fast claims if anything goes wrong." }
-            ].map((card, idx) => (
-              <motion.div
-                key={idx}
-                className="neo-flat p-8 flex flex-col items-center text-center space-y-4"
-                variants={itemVariants}
-                whileHover={{ y: -5, boxShadow: "var(--neo-shadow-flat-hover)" }}
-              >
-                <div className="w-14 h-14 rounded-full neo-pressed flex items-center justify-center text-brandPrimary">
-                  {card.icon}
-                </div>
-                <h3 className="text-lg font-bold text-textPrimary">{card.title}</h3>
-                <p className="text-xs text-textSecondary font-semibold leading-relaxed">{card.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Section 1.6: Testimonials */}
-      <section className="py-24 bg-background relative">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-textPrimary tracking-tight">
-              What Our Community Says
-            </h2>
-            <div className="w-16 h-1 bg-gradient-to-r from-brandPrimary to-brandAccent mx-auto mt-3 rounded-full" />
-          </div>
-
-          <TestimonialCarousel />
-        </div>
-      </section>
-
-      {/* Section 1.7: CTA Banner */}
+      {/* CTA Banner */}
       <section className="py-20 max-w-7xl mx-auto px-6">
-        <div className="neo-flat p-10 md:p-16 text-center relative overflow-hidden bg-gradient-to-br from-brandPrimary/5 to-brandAccent/10">
-          <div className="absolute inset-0 bg-gradient-to-r from-brandPrimary/10 to-brandAccent/10 pointer-events-none animate-pulse duration-5000" />
-          <div className="relative z-10 max-w-2xl mx-auto space-y-8">
+        <div className="neo-flat p-10 md:p-16 text-center">
+          <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-4xl md:text-5xl font-extrabold text-textPrimary leading-tight">
               Ready to make your first wish?
             </h2>

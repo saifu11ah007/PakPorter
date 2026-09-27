@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, CheckCircle2, ArrowLeft, Sparkles, DollarSign, Calendar, MessageSquare } from 'lucide-react';
+import PageLoader from '../components/PageLoader';
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -206,24 +207,7 @@ const BidForm = () => {
   };
 
   if (authLoading || isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto"
-          ></motion.div>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-6 text-lg font-medium text-gray-700"
-          >
-            Preparing your bidding experience...
-          </motion.p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (fetchError) {

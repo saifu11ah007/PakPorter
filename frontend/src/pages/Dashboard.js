@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Home, ShoppingBag, Map, MessageSquare, CreditCard, User, CheckCircle, Package, Plus, Clock, ChevronRight, LogOut } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PageLoader from '../components/PageLoader';
 
 // Helper component for animating dashboard numbers
 const DashboardCounter = ({ value, prefix = "", suffix = "" }) => {
@@ -128,6 +129,8 @@ const Dashboard = () => {
     { name: 'My Trips', icon: <Map className="w-5 h-5" />, path: '/trips' },
     { name: 'Profile', icon: <User className="w-5 h-5" />, path: '/profile' }
   ];
+
+  if (!userProfile) return <PageLoader />;
 
   return (
     <div className="min-h-screen bg-background text-textPrimary pt-20">
