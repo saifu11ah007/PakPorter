@@ -65,42 +65,24 @@ var __export = (target, all) => {
 
 // src/motion.ts
 
-function stepPlanet(m, dt, auto, reduced, autoRoll = -0.032) {
-
+function stepPlanet(m, dt, auto, reduced, autoRoll = -0.45) {
   m.time += dt;
-
   if (!auto) {
-
     m.dragging = false;
-
     m.planetVelocity = m.pitchVelocity = 0;
-
     m.dragTarget = m.planetAngle;
-
     m.pitchTarget = m.pitchAngle;
-
     return;
-
   }
-
   if (m.dragging) {
-
     const acceleration = 90 * (m.dragTarget - m.planetAngle) - 18 * m.planetVelocity;
-
     m.planetVelocity += acceleration * dt;
-
   } else {
-
-    const desired = auto && !reduced && m.time - m.lastInteraction > 3.5 ? autoRoll : 0;
-
+    const desired = auto && !reduced ? autoRoll : 0;
     m.planetVelocity = damp(m.planetVelocity, desired, reduced ? 12 : 5, dt);
-
   }
-
-  m.planetVelocity = clamp(m.planetVelocity, -1.15, 1.15);
-
+  m.planetVelocity = clamp(m.planetVelocity, -1.25, 1.25);
   m.planetAngle += m.planetVelocity * dt;
-
 }
 
 function stepRunner(m, dt, screenTopLocal, reduced) {
@@ -200,41 +182,23 @@ function createGlobeMotion() {
 }
 
 function stepGlobeMotion(globe, m, dt, auto, reduced) {
-
-  const roaming = auto && !reduced && !m.dragging && m.time - m.lastInteraction > 3.5;
-
-  if (roaming) globe.route += 0.24 * dt;
-
-  stepPlanet(m, dt, auto, reduced, -0.24 * Math.cos(globe.route));
-
+  const roaming = auto && !reduced && !m.dragging;
+  if (roaming) globe.route += 0.55 * dt;
+  stepPlanet(m, dt, auto, reduced, -0.45 * Math.cos(globe.route));
   if (!auto) {
-
     globe.angular.set(0, 0, 0);
-
     return;
-
   }
-
   if (m.dragging) m.pitchVelocity += (70 * (m.pitchTarget - m.pitchAngle) - 17 * m.pitchVelocity) * dt;
-
-  else m.pitchVelocity = MathUtils.damp(m.pitchVelocity, roaming ? 0.24 * Math.sin(globe.route) : 0, 6, dt);
-
-  m.pitchVelocity = MathUtils.clamp(m.pitchVelocity, -0.55, 0.55);
-
+  else m.pitchVelocity = MathUtils.damp(m.pitchVelocity, roaming ? 0.35 * Math.sin(globe.route) : 0, 4, dt);
+  m.pitchVelocity = MathUtils.clamp(m.pitchVelocity, -0.65, 0.65);
   m.pitchAngle += m.pitchVelocity * dt;
-
   globe.angular.set(m.pitchVelocity, m.planetVelocity * 0.45, -m.planetVelocity);
-
   const speed = globe.angular.length();
-
   if (speed > 1e-8) {
-
     globe.delta.setFromAxisAngle(globe.angular.multiplyScalar(1 / speed), speed * dt);
-
     globe.orientation.premultiply(globe.delta).normalize();
-
   }
-
 }
 
 var init_globeMotion = __esm({
