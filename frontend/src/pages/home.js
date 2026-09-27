@@ -146,8 +146,8 @@ const PakPorterHomepage = () => {
                 </motion.button>
               </motion.div>
 
-              {/* Stats badges
-              <motion.div
+              {/* Stats badges */}
+              {/* <motion.div
                 className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4"
                 variants={containerVariants}
               >
@@ -160,20 +160,20 @@ const PakPorterHomepage = () => {
                 <motion.div variants={itemVariants}>
                   <StatCounter prefix="" value={4.8} decimals={1} label="Rating" />
                 </motion.div>
-              </motion.div>
-            </motion.div> */}
+              </motion.div> */}
+            </motion.div>
 
-              {/* Right Column: 3D Orbit & Runner Animation */}
-              <motion.div
-                className="relative flex items-center justify-center w-full min-h-[460px] lg:min-h-[540px]"
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              >
-                <div className="relative w-full h-[460px] lg:h-[540px] flex items-center justify-center">
-                  <OrbitDeliveryHero theme={theme} onlyOrbit={true} />
-                </div>
-              </motion.div>
+            {/* Right Column: 3D Orbit & Runner Animation */}
+            <motion.div
+              className="relative flex items-center justify-center w-full min-h-[460px] lg:min-h-[540px]"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <div className="relative w-full h-[460px] lg:h-[540px] flex items-center justify-center">
+                <OrbitDeliveryHero theme={theme} onlyOrbit={true} />
+              </div>
+            </motion.div>
 
           </div>
         </div>
