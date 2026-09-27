@@ -1,50 +1,12 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import OrbitDeliveryHero from '../components/ui/orbit-delivery-hero';
 import { useTheme } from '../context/ThemeContext';
 
-// Helper component for animating stats counts
-// const StatCounter = ({ value, label, prefix = "", suffix = "", decimals = 0 }) => {
-//   const [count, setCount] = React.useState(0);
-//   const ref = useRef(null);
-//   const inView = useInView(ref, { once: true });
 
-//   React.useEffect(() => {
-//     if (inView) {
-//       let start = 0;
-//       const end = value;
-//       const duration = 1500;
-//       const incrementTime = 30;
-//       const step = (end / (duration / incrementTime));
-
-//       const timer = setInterval(() => {
-//         start += step;
-//         if (start >= end) {
-//           setCount(end);
-//           clearInterval(timer);
-//         } else {
-//           setCount(start);
-//         }
-//       }, incrementTime);
-
-//       return () => clearInterval(timer);
-//     }
-//   }, [inView, value]);
-
-//   return (
-//     <div ref={ref} className="neo-flat px-6 py-4 flex items-center space-x-3">
-//       <span className="text-xl md:text-2xl font-extrabold text-brandPrimary">
-//         {prefix}
-//         {count.toFixed(decimals)}
-//         {suffix}
-//       </span>
-//       <span className="text-xs md:text-sm font-bold text-textSecondary uppercase tracking-wider">{label}</span>
-//     </div>
-//   );
-// };
 
 // Animated Checkmark for For Wishers / For Travellers sections
 const AnimatedCheck = () => (
